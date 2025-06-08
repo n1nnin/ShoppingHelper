@@ -1,0 +1,126 @@
+# macOS
+.DS_Store
+
+# IntelliJ IDEA / Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+.gradle/
+local.properties
+
+# Gradle
+build/
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+!gradle-wrapper.properties
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+# Android
+*.apk
+*.aab
+*.ap_
+*.dex
+output.json
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Kotlin Multiplatform
+shared/build/
+composeApp/build/
+androidApp/build/
+iosApp/build/
+
+# Generated files
+**/build/
+**/generated/
+
+# Compose Resources Generated
+**/generated/compose/resourceGenerator/
+
+# SQLDelight Generated (将来追加予定)
+**/generated/sqldelight/
+
+# Logs
+*.log
+
+# Keystore files (セキュリティ重要)
+*.jks
+*.keystore
+key.properties
+
+# Local configuration file (API keys等)
+local.properties
+secrets.properties
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Backup files
+*~
+*.swp
+*.bak
+
+# Temporary files
+*.tmp
+*.temp
+
+# Firebase (将来使用する可能性)
+google-services.json
+GoogleService-Info.plist
+
+# Test results
+test-results/
+reports/
+
+# Coverage reports
+coverage/
+.nyc_output/
+
+# KMM (Kotlin Multiplatform Mobile) iOS
+iosApp/Pods/
+iosApp/*.xcworkspace/xcuserdata/
+iosApp/*.xcodeproj/xcuserdata/
+iosApp/*.xcodeproj/project.xcworkspace/xcuserdata/
+iosApp/build/
+iosApp/DerivedData/
+
+# Xcode
+*.xcuserstate
+*.hmap
+*.ipa
+xcuserdata/
+DerivedData/
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Proguard
+proguard/
+
+# LLDB
+.lldbinit
+
+# Kotlin Native
+konan/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Cache files
+.build-cache/
+.kotlin/

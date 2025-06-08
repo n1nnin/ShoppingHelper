@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Shopping Helper</string>
+    <string name="priority_high">高</string>
+    <string name="priority_middle">中</string>
+    <string name="priority_low">低</string>
+    <string name="priority_urgent">緊急</string>
+</resources>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Priority strings -->
+    <string name="priority_low">低</string>
+    <string name="priority_normal">普通</string>
+    <string name="priority_high">高</string>
+    <string name="priority_urgent">緊急</string>
+
+    <!-- Shop Category strings -->
+    <string name="shop_category_grocery">スーパーマーケット</string>
+    <string name="shop_category_pharmacy">薬局</string>
+    <string name="shop_category_convenience">コンビニ</string>
+    <string name="shop_category_department">デパート</string>
+    <string name="shop_category_electronics">家電量販店</string>
+    <string name="shop_category_clothing">衣料品店</string>
+    <string name="shop_category_restaurant">レストラン</string>
+    <string name="shop_category_other">その他</string>
+</resources>

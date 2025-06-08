@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Priority strings -->
+    <string name="priority_low">Low</string>
+    <string name="priority_normal">Normal</string>
+    <string name="priority_high">High</string>
+    <string name="priority_urgent">Urgent</string>
+
+    <!-- Shop Category strings -->
+    <string name="shop_category_grocery">Supermarket</string>
+    <string name="shop_category_pharmacy">Pharmacy</string>
+    <string name="shop_category_convenience">Convenience Store</string>
+    <string name="shop_category_department">Department Store</string>
+    <string name="shop_category_electronics">Electronics Store</string>
+    <string name="shop_category_clothing">Clothing Store</string>
+    <string name="shop_category_restaurant">Restaurant</string>
+    <string name="shop_category_other">Other</string>
+</resources>
