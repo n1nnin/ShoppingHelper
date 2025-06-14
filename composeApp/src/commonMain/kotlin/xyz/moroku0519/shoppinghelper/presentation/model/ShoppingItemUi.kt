@@ -8,7 +8,7 @@ import shoppinghelper.composeapp.generated.resources.priority_high
 import shoppinghelper.composeapp.generated.resources.priority_low
 import shoppinghelper.composeapp.generated.resources.priority_normal
 import shoppinghelper.composeapp.generated.resources.priority_urgent
-import xyz.moroku0519.shoppinghelper.di.model.Priority
+import xyz.moroku0519.shoppinghelper.domain.model.Priority
 
 data class ShoppingItemUi(
     val id: String,

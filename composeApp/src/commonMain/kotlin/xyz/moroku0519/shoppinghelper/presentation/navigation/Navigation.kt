@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import xyz.moroku0519.shoppinghelper.presentation.screens.MapScreen
 import xyz.moroku0519.shoppinghelper.presentation.screens.ShoppingListScreen
 import xyz.moroku0519.shoppinghelper.presentation.screens.ShopsScreen
 
@@ -12,6 +13,7 @@ import xyz.moroku0519.shoppinghelper.presentation.screens.ShopsScreen
 sealed class Screen(val route: String) {
     data object ShoppingList : Screen("shopping_list")
     data object Shops : Screen("shops")
+    data object Map : Screen("map")
 }
 
 @Composable
@@ -34,6 +36,17 @@ fun ShoppingMemoNavigation(
         // お店一覧画面
         composable(Screen.Shops.route) {
             ShopsScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onNavigateToMap = {
+                    navController.navigate(Screen.Map.route)
+                }
+            )
+        }
+
+        composable(Screen.Map.route) {
+            MapScreen(
                 onBackClick = {
                     navController.popBackStack()
                 }

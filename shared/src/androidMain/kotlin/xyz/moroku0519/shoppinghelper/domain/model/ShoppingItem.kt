@@ -1,4 +1,4 @@
-package xyz.moroku0519.shoppinghelper.di.model
+package xyz.moroku0519.shoppinghelper.domain.model
 
 data class ShoppingItem(
     val id: String,

@@ -24,6 +24,7 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(compose.components.resources)
             implementation(libs.androidx.appcompat)
+            implementation(libs.accompanist.permissions)
 
             // Navigation
             implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -37,6 +38,9 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.compose.ui.tooling.preview)
             implementation(libs.compose.ui.tooling)
+
+            implementation(libs.play.services.maps)
+            implementation(libs.maps.compose)
         }
     }
 }
@@ -55,6 +59,7 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+        manifestPlaceholders["MAPS_API_KEY"] = project.findProperty("MAPS_API_KEY") ?: "YOUR_API_KEY_HERE"
     }
 
     packaging {

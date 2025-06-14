@@ -5,8 +5,8 @@ import androidx.compose.ui.graphics.Color
 import org.jetbrains.compose.resources.stringResource
 import shoppinghelper.composeapp.generated.resources.Res
 import shoppinghelper.composeapp.generated.resources.*
-import xyz.moroku0519.shoppinghelper.di.model.Shop
-import xyz.moroku0519.shoppinghelper.di.model.ShopCategory
+import xyz.moroku0519.shoppinghelper.domain.model.Shop
+import xyz.moroku0519.shoppinghelper.domain.model.ShopCategory
 
 data class ShopUi(
     val id: String,
@@ -14,7 +14,9 @@ data class ShopUi(
     val address: String,
     val category: ShopCategory,
     val pendingItemsCount: Int = 0,
-    val totalItemsCount: Int = 0
+    val totalItemsCount: Int = 0,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
 ) {
     val categoryColor: Color = category.color
 }
@@ -40,6 +42,8 @@ fun Shop.toUiModel(pendingItemsCount: Int = 0, totalItemsCount: Int = 0): ShopUi
         address = address,
         category = category,
         pendingItemsCount = pendingItemsCount,
-        totalItemsCount = totalItemsCount
+        totalItemsCount = totalItemsCount,
+        latitude = latitude,
+        longitude = longitude
     )
 }

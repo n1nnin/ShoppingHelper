@@ -6,14 +6,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import xyz.moroku0519.shoppinghelper.di.model.Shop
-import xyz.moroku0519.shoppinghelper.di.model.ShopCategory
+import xyz.moroku0519.shoppinghelper.domain.model.Shop
+import xyz.moroku0519.shoppinghelper.domain.model.ShopCategory
 import xyz.moroku0519.shoppinghelper.presentation.components.AddShopDialog
 import xyz.moroku0519.shoppinghelper.presentation.components.ShopCard
 import xyz.moroku0519.shoppinghelper.presentation.model.ShopUi
@@ -23,7 +24,8 @@ import java.util.UUID
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShopsScreen(
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onNavigateToMap: () -> Unit = {}
 ) {
     // 状態管理：お店リスト
     var shops by remember {
@@ -33,19 +35,22 @@ fun ShopsScreen(
                     id = "shop1",
                     name = "イオン",
                     address = "東京都渋谷区神南1-1-1",
-                    category = ShopCategory.GROCERY
+                    category = ShopCategory.GROCERY,
+                    latitude = 35.6598, longitude = 139.7006
                 ).toUiModel(pendingItemsCount = 3, totalItemsCount = 8),
                 Shop(
                     id = "shop2",
                     name = "ツルハドラッグ",
                     address = "東京都新宿区新宿3-1-1",
-                    category = ShopCategory.PHARMACY
+                    category = ShopCategory.PHARMACY,
+                    latitude = 35.6896, longitude = 139.7006
                 ).toUiModel(pendingItemsCount = 1, totalItemsCount = 2),
                 Shop(
                     id = "shop3",
                     name = "セブンイレブン",
                     address = "東京都千代田区丸の内1-1-1",
-                    category = ShopCategory.CONVENIENCE
+                    category = ShopCategory.CONVENIENCE,
+                    latitude = 35.6812, longitude = 139.7671
                 ).toUiModel(pendingItemsCount = 0, totalItemsCount = 1)
             )
         )
@@ -73,6 +78,14 @@ fun ShopsScreen(
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "戻る"
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onNavigateToMap) {
+                        Icon(
+                            Icons.Default.LocationOn,
+                            contentDescription = "地図表示"
                         )
                     }
                 }
@@ -125,12 +138,16 @@ fun ShopsScreen(
                 isVisible = showAddDialog,
                 onDismiss = { showAddDialog = false },
                 onConfirm = { name, address, category ->
+                    val randomLat = 35.6812 + (Math.random() - 0.5) * 0.01
+                    val randomLng = 139.7671 + (Math.random() - 0.5) * 0.01
                     // 新しいお店を追加
                     val newShop = Shop(
                         id = UUID.randomUUID().toString(),
                         name = name,
                         address = address,
                         category = category,
+                        longitude = randomLng,
+                        latitude = randomLat,
                         createdAt = System.currentTimeMillis()
                     ).toUiModel()
 
