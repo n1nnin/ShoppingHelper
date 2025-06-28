@@ -12,6 +12,7 @@ koin = "3.5.0"
 play-services-maps = "18.2.0"
 maps-compose = "4.3.3"
 accompanist = "0.32.0"
+playServicesLocation = "21.3.0"
 
 [libraries]
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
@@ -36,6 +37,7 @@ koin-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = 
 
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "play-services-maps" }
 maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "maps-compose" }
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,6 +17,8 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import xyz.moroku0519.shoppinghelper.model.Shop
 import xyz.moroku0519.shoppinghelper.model.ShopCategory
 import xyz.moroku0519.shoppinghelper.presentation.components.AddShopDialog
+import xyz.moroku0519.shoppinghelper.presentation.components.GeofenceHandler
+import xyz.moroku0519.shoppinghelper.presentation.components.GeofenceTestButton
 import xyz.moroku0519.shoppinghelper.presentation.components.ShopCard
 import xyz.moroku0519.shoppinghelper.presentation.model.ShopUi
 import xyz.moroku0519.shoppinghelper.presentation.model.toUiModel
@@ -55,6 +58,9 @@ fun ShopsScreen(
             )
         )
     }
+
+    // Geofence自動設定
+    GeofenceHandler(shops)
 
     // 削除確認ダイアログ用の状態
     var shopToDelete by remember { mutableStateOf<ShopUi?>(null) }
@@ -129,6 +135,13 @@ fun ShopsScreen(
                             onDeleteClick = {
                                 shopToDelete = shop
                             }
+                        )
+                    }
+                    
+                    // Geofence通知テストボタンを追加
+                    item {
+                        GeofenceTestButton(
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
                 }

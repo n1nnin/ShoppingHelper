@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,11 +16,12 @@ import androidx.compose.ui.unit.dp
 import xyz.moroku0519.shoppinghelper.model.Location
 import xyz.moroku0519.shoppinghelper.model.Shop
 import xyz.moroku0519.shoppinghelper.model.ShopCategory
+import xyz.moroku0519.shoppinghelper.presentation.components.GeofenceHandler
+import xyz.moroku0519.shoppinghelper.presentation.components.GeofenceTestButton
 import xyz.moroku0519.shoppinghelper.presentation.components.LocationPermissionHandler
 import xyz.moroku0519.shoppinghelper.presentation.components.LocationPermissionState
 import xyz.moroku0519.shoppinghelper.presentation.model.ShopUi
 import xyz.moroku0519.shoppinghelper.presentation.model.toUiModel
-import kotlin.text.*
 
 // ✅ expect宣言を追加
 @Composable
@@ -39,7 +41,6 @@ expect fun rememberLocationPermissionState(): LocationPermissionState?
 fun MapScreen(
     onBackClick: () -> Unit
 ) {
-    // 既存の実装はそのまま...
     val sampleShops = remember {
         listOf(
             Shop(
@@ -68,6 +69,9 @@ fun MapScreen(
 
     var currentLocation by remember { mutableStateOf(Location.TOKYO_STATION) }
     val locationPermissionState = rememberLocationPermissionState()
+    
+    // Geofence自動設定
+    GeofenceHandler(sampleShops)
 
     Scaffold(
         topBar = {
@@ -93,16 +97,31 @@ fun MapScreen(
                 actions = {
                     IconButton(
                         onClick = {
+                            println("通知テストボタンがタップされました")
+                            testNotification()
+                        }
+                    ) {
+                        Icon(
+                            Icons.Default.Notifications,
+                            contentDescription = "通知テスト"
+                        )
+                    }
+
+                    IconButton(
+                        onClick = {
                             println("現在地ボタンがタップされました")
+                            setupGeofencesForShops(sampleShops)
                         }
                     ) {
                         Icon(
                             Icons.Default.LocationOn,
-                            contentDescription = "現在地"
+                            contentDescription = "現在地・Geofence設定"
                         )
-                    }
-                }
+                    }                }
             )
+        },
+        floatingActionButton = {
+            GeofenceTestButton()
         }
     ) { paddingValues ->
         LocationPermissionHandler(
@@ -140,7 +159,6 @@ private fun RealMapContent(
     currentLocation: Location,
     modifier: Modifier = Modifier
 ) {
-    // ✅ AndroidMapViewを使用
     AndroidMapView(
         shops = shops,
         currentLocation = currentLocation,
@@ -216,5 +234,39 @@ private fun PreviewMapContent(
                 }
             }
         }
+    }
+}
+
+private fun setupGeofencesForShops(shops: List<ShopUi>) {
+    try {
+        // Android固有の処理なので、try-catchで囲む
+        println("Geofence設定を開始...")
+        println("対象店舗数: ${shops.size}")
+        shops.forEach { shop ->
+            if (shop.pendingItemsCount > 0) {
+                println("Geofence設定対象: ${shop.name} (未完了アイテム: ${shop.pendingItemsCount}件)")
+            }
+        }
+
+        println("Geofence設定完了（模擬）")
+
+    } catch (e: Exception) {
+        println("Geofence設定エラー: ${e.message}")
+    }
+}
+
+private fun testNotification() {
+    try {
+        // Android固有の処理
+        println("通知テストを実行...")
+
+        // TODO: 実際の通知マネージャーを呼び出し
+        // val notificationManager = ShoppingNotificationManager(context)
+        // notificationManager.showTestNotification()
+
+        println("通知テスト完了（模擬）")
+
+    } catch (e: Exception) {
+        println("通知テストエラー: ${e.message}")
     }
 }
