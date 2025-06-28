@@ -12,9 +12,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
-import xyz.moroku0519.shoppinghelper.domain.model.Location
-import xyz.moroku0519.shoppinghelper.domain.model.Shop
-import xyz.moroku0519.shoppinghelper.domain.model.ShopCategory
+import xyz.moroku0519.shoppinghelper.model.Location
+import xyz.moroku0519.shoppinghelper.model.Shop
+import xyz.moroku0519.shoppinghelper.model.ShopCategory
 import xyz.moroku0519.shoppinghelper.presentation.components.LocationPermissionHandler
 import xyz.moroku0519.shoppinghelper.presentation.components.LocationPermissionState
 import xyz.moroku0519.shoppinghelper.presentation.model.ShopUi

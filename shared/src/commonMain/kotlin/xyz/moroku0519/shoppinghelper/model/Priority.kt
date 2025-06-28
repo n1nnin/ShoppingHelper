@@ -1,4 +1,4 @@
-package xyz.moroku0519.shoppinghelper.domain.model
+package xyz.moroku0519.shoppinghelper.model
 
 import androidx.compose.ui.graphics.Color
 

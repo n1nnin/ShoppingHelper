@@ -10,8 +10,8 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.maps.android.compose.*
-import xyz.moroku0519.shoppinghelper.domain.model.Location
-import xyz.moroku0519.shoppinghelper.domain.model.ShopCategory
+import xyz.moroku0519.shoppinghelper.model.Location
+import xyz.moroku0519.shoppinghelper.model.ShopCategory
 import xyz.moroku0519.shoppinghelper.presentation.model.ShopUi
 
 @Composable

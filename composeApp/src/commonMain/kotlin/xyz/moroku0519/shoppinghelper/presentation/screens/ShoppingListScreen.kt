@@ -11,7 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import xyz.moroku0519.shoppinghelper.domain.model.Priority
+import xyz.moroku0519.shoppinghelper.model.Priority
 import xyz.moroku0519.shoppinghelper.presentation.components.AddItemDialog
 import xyz.moroku0519.shoppinghelper.presentation.components.ShoppingItemCard
 import xyz.moroku0519.shoppinghelper.presentation.model.ShoppingItemUi

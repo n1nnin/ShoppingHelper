@@ -5,8 +5,8 @@ import androidx.compose.ui.graphics.Color
 import org.jetbrains.compose.resources.stringResource
 import shoppinghelper.composeapp.generated.resources.Res
 import shoppinghelper.composeapp.generated.resources.*
-import xyz.moroku0519.shoppinghelper.domain.model.Shop
-import xyz.moroku0519.shoppinghelper.domain.model.ShopCategory
+import xyz.moroku0519.shoppinghelper.model.Shop
+import xyz.moroku0519.shoppinghelper.model.ShopCategory
 
 data class ShopUi(
     val id: String,

@@ -10,7 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import xyz.moroku0519.shoppinghelper.domain.model.Priority
+import xyz.moroku0519.shoppinghelper.model.Priority
 import xyz.moroku0519.shoppinghelper.presentation.model.getDisplayName
 
 @Composable
