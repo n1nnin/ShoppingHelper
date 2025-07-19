@@ -28,7 +28,8 @@ import java.util.UUID
 @Composable
 fun ShopsScreen(
     onBackClick: () -> Unit,
-    onNavigateToMap: () -> Unit = {}
+    onNavigateToMap: () -> Unit = {},
+    onShopClick: (String) -> Unit = {}
 ) {
     // 状態管理：お店リスト
     var shops by remember {
@@ -80,12 +81,7 @@ fun ShopsScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "戻る"
-                        )
-                    }
+                    // お店一覧がメイン画面になったため、戻るボタンは不要
                 },
                 actions = {
                     IconButton(onClick = onNavigateToMap) {
@@ -125,8 +121,7 @@ fun ShopsScreen(
                         ShopCard(
                             shop = shop,
                             onShopClick = {
-                                println("お店クリック: ${shop.name}")
-                                // TODO: お店詳細画面への遷移
+                                onShopClick(shop.id)
                             },
                             onEditClick = {
                                 println("お店編集: ${shop.name}")

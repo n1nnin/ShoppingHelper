@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
@@ -20,10 +21,14 @@ import java.util.UUID
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShoppingListScreen(
-    onNavigateToShops: () -> Unit = {}
+    shopId: String? = null,
+    onNavigateToShops: () -> Unit = {},
+    onBackClick: (() -> Unit)? = null
 ) {
     var itemToDelete by remember { mutableStateOf<ShoppingItemUi?>(null) }
-    var items by remember {
+    
+    // 全アイテムを保持
+    val allItems = remember {
         mutableStateOf(
             listOf(
                 ShoppingItemUi(
@@ -60,6 +65,17 @@ fun ShoppingListScreen(
                 )
             )
         )
+    }.value
+    
+    // shopIdに基づいてフィルタリング
+    var items by remember(shopId) {
+        mutableStateOf(
+            if (shopId != null) {
+                allItems.filter { it.shopId == shopId }
+            } else {
+                allItems
+            }
+        )
     }
 
     var showAddDialog by remember { mutableStateOf(false) }
@@ -69,7 +85,14 @@ fun ShoppingListScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text("買い物リスト")
+                        Text(
+                            text = if (shopId != null) {
+                                val shopName = items.firstOrNull { it.shopId == shopId }?.shopName ?: "お店"
+                                "${shopName}の買い物リスト"
+                            } else {
+                                "買い物リスト"
+                            }
+                        )
                         // 統計情報を表示
                         val completedCount = items.count { it.isCompleted }
                         val totalCount = items.size
@@ -82,10 +105,16 @@ fun ShoppingListScreen(
                         }
                     }
                 },
-                actions = {
-                    IconButton(onClick = onNavigateToShops) {
-                        Icon(Icons.Default.ShoppingCart, contentDescription = "お店一覧")
+                navigationIcon = {
+                    IconButton(onClick = { onBackClick?.invoke() ?: onNavigateToShops() }) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "戻る"
+                        )
                     }
+                },
+                actions = {
+                    // お店一覧への直接遷移は削除（戻るボタンで戻るため）
                 }
             )
         },
@@ -124,14 +153,19 @@ fun ShoppingListScreen(
             AddItemDialog(
                 isVisible = showAddDialog,
                 onDismiss = { showAddDialog = false },
-                onConfirm = { name, shopName, priority ->
+                onConfirm = { name, priority ->
                     // 新しいアイテムを追加
                     val newItem = ShoppingItemUi(
                         id = UUID.randomUUID().toString(),
                         name = name,
                         isCompleted = false,
-                        shopName = shopName,
-                        shopId = shopName?.let { "shop_${UUID.randomUUID()}" },
+                        shopName = if (shopId != null && shopId != "all") {
+                            // 現在のショップ名を使用
+                            items.firstOrNull { it.shopId == shopId }?.shopName
+                        } else {
+                            null
+                        },
+                        shopId = if (shopId != null && shopId != "all") shopId else null,
                         priority = priority
                     )
                     items = items + newItem
