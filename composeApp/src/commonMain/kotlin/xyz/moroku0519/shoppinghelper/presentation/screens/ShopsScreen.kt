@@ -14,8 +14,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.koinInject
 import xyz.moroku0519.shoppinghelper.model.Shop
 import xyz.moroku0519.shoppinghelper.model.ShopCategory
+import xyz.moroku0519.shoppinghelper.model.Location
 import xyz.moroku0519.shoppinghelper.presentation.components.AddShopDialog
 import xyz.moroku0519.shoppinghelper.presentation.components.EditShopDialog
 import xyz.moroku0519.shoppinghelper.presentation.components.GeofenceHandler
@@ -23,6 +25,7 @@ import xyz.moroku0519.shoppinghelper.presentation.components.GeofenceTestButton
 import xyz.moroku0519.shoppinghelper.presentation.components.ShopCard
 import xyz.moroku0519.shoppinghelper.presentation.model.ShopUi
 import xyz.moroku0519.shoppinghelper.presentation.model.toUiModel
+import xyz.moroku0519.shoppinghelper.presentation.viewmodel.ShoppingListViewModel
 import xyz.moroku0519.shoppinghelper.util.currentTimeMillis
 import java.util.UUID
 
@@ -35,8 +38,12 @@ fun ShopsScreen(
     onNavigateToMap: () -> Unit = {},
     onShopClick: (String) -> Unit = {}
 ) {
-    // 状態管理：お店リスト
-    var shops by remember { mutableStateOf(initialShops) }
+    val viewModel: ShoppingListViewModel = koinInject()
+    
+    // ViewModelからお店データを取得
+    val shops by viewModel.shops.collectAsState()
+    
+    // 初期データがある場合は無視（ViewModelのデータを優先）
 
     // Geofence自動設定
     GeofenceHandler(shops)
@@ -126,22 +133,18 @@ fun ShopsScreen(
                 onConfirm = { name, address, category ->
                     val randomLat = 35.6812 + (Math.random() - 0.5) * 0.01
                     val randomLng = 139.7671 + (Math.random() - 0.5) * 0.01
-                    // 新しいお店を追加
-                    val newShop = Shop(
-                        id = UUID.randomUUID().toString(),
+                    
+                    // ViewModelを使用してお店を追加（永続化される）
+                    viewModel.addShop(
                         name = name,
                         address = address,
-                        category = category,
-                        longitude = randomLng,
                         latitude = randomLat,
-                        createdAt = currentTimeMillis()
-                    ).toUiModel()
-
-                    shops = shops + newShop
-                    onShopsUpdated(shops)
+                        longitude = randomLng,
+                        category = category
+                    )
+                    
                     showAddDialog = false
-
-                    println("新しいお店が追加されました: $newShop")
+                    println("新しいお店が追加されました: $name")
                 }
             )
 
@@ -150,26 +153,19 @@ fun ShopsScreen(
                 shop = shopToEdit,
                 onDismiss = { shopToEdit = null },
                 onConfirm = { name, address, category ->
-                    shops = shops.map { shop ->
-                        if (shop.id == shopToEdit?.id) {
-                            Shop(
-                                id = shop.id,
-                                name = name,
-                                address = address,
-                                category = category,
-                                latitude = shop.latitude,
-                                longitude = shop.longitude
-                            ).toUiModel(
-                                pendingItemsCount = shop.pendingItemsCount,
-                                totalItemsCount = shop.totalItemsCount
-                            )
-                        } else {
-                            shop
-                        }
+                    shopToEdit?.let { shop ->
+                        // ViewModelを使用してお店を更新（永続化される）
+                        viewModel.updateShop(
+                            shopId = shop.id,
+                            name = name,
+                            address = address,
+                            latitude = shop.latitude,
+                            longitude = shop.longitude,
+                            category = category
+                        )
                     }
                     shopToEdit = null
-                    onShopsUpdated(shops)
-                    println("お店が更新されました: ${shopToEdit?.name}")
+                    println("お店が更新されました")
                 }
             )
 
@@ -189,8 +185,8 @@ fun ShopsScreen(
                     confirmButton = {
                         TextButton(
                             onClick = {
-                                shops = shops.filter { it.id != shop.id }
-                                onShopsUpdated(shops)
+                                // ViewModelを使用してお店を削除（永続化される）
+                                viewModel.deleteShop(shop.id)
                                 shopToDelete = null
                                 println("お店削除: ${shop.name}")
                             }

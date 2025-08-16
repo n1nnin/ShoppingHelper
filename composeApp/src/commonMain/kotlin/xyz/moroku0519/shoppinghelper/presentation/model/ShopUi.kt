@@ -19,14 +19,31 @@ data class ShopUi(
     val longitude: Double? = null,
 ) {
     val categoryColor: Color = category.color
+    
+    companion object {
+        fun fromShop(shop: Shop, pendingItemsCount: Int = 0, totalItemsCount: Int = 0): ShopUi {
+            return ShopUi(
+                id = shop.id,
+                name = shop.name,
+                address = shop.address ?: "",
+                category = shop.category,
+                pendingItemsCount = pendingItemsCount,
+                totalItemsCount = totalItemsCount,
+                latitude = shop.location?.latitude,
+                longitude = shop.location?.longitude
+            )
+        }
+    }
 }
 
 @Composable
 fun ShopCategory.getDisplayName(): String {
     return when (this) {
         ShopCategory.GROCERY -> stringResource(Res.string.shop_category_grocery)
+        ShopCategory.SUPERMARKET -> "スーパーマーケット" // fallback
         ShopCategory.PHARMACY -> stringResource(Res.string.shop_category_pharmacy)
         ShopCategory.CONVENIENCE -> stringResource(Res.string.shop_category_convenience)
+        ShopCategory.CONVENIENCE_STORE -> "コンビニエンスストア" // fallback
         ShopCategory.BAKERY -> stringResource(Res.string.shop_category_bakery)
         ShopCategory.DEPARTMENT -> stringResource(Res.string.shop_category_department)
         ShopCategory.ELECTRONICS -> stringResource(Res.string.shop_category_electronics)

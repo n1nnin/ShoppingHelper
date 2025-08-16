@@ -1,19 +1,16 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.kotlin.compose)
+    kotlin("plugin.serialization") version "2.1.0"
 }
 
 kotlin {
     androidTarget {
         compilations.all {
-            compileTaskProvider.configure {
-                compilerOptions {
-                    jvmTarget.set(JvmTarget.JVM_1_8)
-                }
+            kotlinOptions {
+                jvmTarget = "1.8"
             }
         }
     }
@@ -38,6 +35,22 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+            
+            // SQLDelight - moved to composeApp
+            // implementation(libs.sqldelight.coroutines)
+            
+            // Koin for DI
+            implementation(libs.koin.core)
+            
+            // Kotlinx Serialization
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+        }
+        androidMain.dependencies {
+            // implementation(libs.sqldelight.driver.android) // moved to composeApp
+            implementation(libs.koin.android)
+        }
+        iosMain.dependencies {
+            // implementation(libs.sqldelight.driver.sqlite) // moved to composeApp
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -56,3 +69,11 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 }
+
+// sqldelight {
+//     databases {
+//         create("ShoppingDatabase") {
+//             packageName.set("xyz.moroku0519.shoppinghelper.database")
+//         }
+//     }
+// }

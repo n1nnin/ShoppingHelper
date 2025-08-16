@@ -135,8 +135,10 @@ fun ShopCard(
 // カテゴリごとのアイコン取得
 private fun getCategoryIcon(category: ShopCategory) = when (category) {
     ShopCategory.GROCERY -> Icons.Default.ShoppingCart
+    ShopCategory.SUPERMARKET -> Icons.Default.ShoppingCart
     ShopCategory.PHARMACY -> Icons.Default.Phone
     ShopCategory.CONVENIENCE -> Icons.Default.AccountCircle
+    ShopCategory.CONVENIENCE_STORE -> Icons.Default.AccountCircle
     ShopCategory.BAKERY -> Icons.Default.ShoppingCart
     ShopCategory.DEPARTMENT -> Icons.Default.Delete
     ShopCategory.ELECTRONICS -> Icons.Default.Search

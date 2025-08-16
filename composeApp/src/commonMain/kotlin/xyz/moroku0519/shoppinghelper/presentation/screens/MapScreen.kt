@@ -47,22 +47,22 @@ fun MapScreen(
                 id = "shop1",
                 name = "イオン渋谷店",
                 address = "東京都渋谷区神南1-1-1",
-                category = ShopCategory.GROCERY,
-                latitude = 35.6598, longitude = 139.7006
+                location = Location(35.6598, 139.7006),
+                category = ShopCategory.GROCERY
             ).toUiModel(pendingItemsCount = 3, totalItemsCount = 8),
             Shop(
                 id = "shop2",
                 name = "ツルハドラッグ新宿店",
                 address = "東京都新宿区新宿3-1-1",
-                category = ShopCategory.PHARMACY,
-                latitude = 35.6896, longitude = 139.7006
+                location = Location(35.6896, 139.7006),
+                category = ShopCategory.PHARMACY
             ).toUiModel(pendingItemsCount = 1, totalItemsCount = 2),
             Shop(
                 id = "shop3",
                 name = "セブンイレブン丸の内店",
                 address = "東京都千代田区丸の内1-1-1",
-                category = ShopCategory.CONVENIENCE,
-                latitude = 35.6812, longitude = 139.7671
+                location = Location(35.6812, 139.7671),
+                category = ShopCategory.CONVENIENCE
             ).toUiModel(pendingItemsCount = 0, totalItemsCount = 1)
         )
     }

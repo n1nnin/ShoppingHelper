@@ -10,6 +10,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import xyz.moroku0519.shoppinghelper.model.Shop
 import xyz.moroku0519.shoppinghelper.model.ShopCategory
+import xyz.moroku0519.shoppinghelper.model.Location
 import xyz.moroku0519.shoppinghelper.notification.ShoppingNotificationManager
 import xyz.moroku0519.shoppinghelper.presentation.model.toUiModel
 
@@ -76,18 +77,16 @@ private fun setupTestGeofences(context: Context) {
             id = "test_shop_1",
             name = "テスト店舗1",
             address = "テスト住所1",
-            category = ShopCategory.GROCERY,
-            latitude = 35.6762, // 東京駅周辺
-            longitude = 139.6503
+            location = Location(35.6762, 139.6503), // 東京駅周辺
+            category = ShopCategory.GROCERY
         ).toUiModel(pendingItemsCount = 2, totalItemsCount = 5),
         
         Shop(
             id = "test_shop_2", 
             name = "テスト店舗2",
             address = "テスト住所2",
-            category = ShopCategory.PHARMACY,
-            latitude = 35.6812, // 東京駅周辺
-            longitude = 139.7671
+            location = Location(35.6812, 139.7671), // 東京駅周辺
+            category = ShopCategory.PHARMACY
         ).toUiModel(pendingItemsCount = 1, totalItemsCount = 3)
     )
     

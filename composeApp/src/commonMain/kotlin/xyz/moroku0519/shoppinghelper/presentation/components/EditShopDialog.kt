@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import xyz.moroku0519.shoppinghelper.model.Shop
 import xyz.moroku0519.shoppinghelper.model.ShopCategory
+import xyz.moroku0519.shoppinghelper.model.Location
 import xyz.moroku0519.shoppinghelper.presentation.model.ShopUi
 import xyz.moroku0519.shoppinghelper.presentation.model.toUiModel
 
@@ -175,9 +176,8 @@ private fun EditShopDialogPreview() {
                     id = "shop1",
                     name = "イオン渋谷店",
                     address = "東京都渋谷区神南1-1-1",
-                    category = ShopCategory.GROCERY,
-                    latitude = 35.6598,
-                    longitude = 139.7006
+                    location = Location(35.6598, 139.7006),
+                    category = ShopCategory.GROCERY
                 ).toUiModel(pendingItemsCount = 3, totalItemsCount = 8),
                 onDismiss = {},
                 onConfirm = { _, _, _ -> }

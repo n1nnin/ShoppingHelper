@@ -11,6 +11,7 @@ import androidx.navigation.navArgument
 import androidx.navigation.NavType
 import xyz.moroku0519.shoppinghelper.model.Shop
 import xyz.moroku0519.shoppinghelper.model.ShopCategory
+import xyz.moroku0519.shoppinghelper.model.Location
 import xyz.moroku0519.shoppinghelper.presentation.model.toUiModel
 import xyz.moroku0519.shoppinghelper.presentation.screens.MapScreen
 import xyz.moroku0519.shoppinghelper.presentation.screens.ShoppingListScreen
@@ -43,22 +44,22 @@ fun ShoppingMemoNavigation(
                     id = "shop1",
                     name = "イオン",
                     address = "東京都渋谷区神南１－１－１",
-                    category = ShopCategory.GROCERY,
-                    latitude = 35.6598, longitude = 139.7006
+                    location = Location(35.6598, 139.7006),
+                    category = ShopCategory.GROCERY
                 ).toUiModel(pendingItemsCount = 3, totalItemsCount = 8),
                 Shop(
                     id = "shop2",
                     name = "ツルハドラッグ",
                     address = "東京都新宿区新宿３－１－１",
-                    category = ShopCategory.PHARMACY,
-                    latitude = 35.6896, longitude = 139.7006
+                    location = Location(35.6896, 139.7006),
+                    category = ShopCategory.PHARMACY
                 ).toUiModel(pendingItemsCount = 1, totalItemsCount = 2),
                 Shop(
                     id = "shop3",
                     name = "セブンイレブン",
                     address = "東京都千代田区丸の内１－１－１",
-                    category = ShopCategory.CONVENIENCE,
-                    latitude = 35.6812, longitude = 139.7671
+                    location = Location(35.6812, 139.7671),
+                    category = ShopCategory.CONVENIENCE
                 ).toUiModel(pendingItemsCount = 0, totalItemsCount = 1)
             )
         )

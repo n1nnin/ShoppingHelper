@@ -1,0 +1,186 @@
+#!/bin/bash
+
+# /commit コマンド - 現在の変更を機能ごとに自動コミット
+
+echo "🚀 Starting feature-based commits..."
+
+# git statusでステータスを確認
+git_status=$(git status --porcelain)
+
+if [ -z "$git_status" ]; then
+    echo "✅ No changes to commit"
+    exit 0
+fi
+
+echo "📝 Current changes:"
+git status --short
+
+# 変更されたファイルをカテゴリごとにグループ化
+declare -A file_groups
+
+# モデル関連の変更
+model_files=""
+ui_component_files=""
+screen_files=""
+dialog_files=""
+config_files=""
+other_files=""
+
+while IFS= read -r line; do
+    status="${line:0:2}"
+    file="${line:3}"
+    
+    # ファイルパスに基づいて分類
+    if [[ "$file" == *"/model/"* ]]; then
+        model_files="$model_files $file"
+    elif [[ "$file" == *"/components/"*Dialog* ]]; then
+        dialog_files="$dialog_files $file"
+    elif [[ "$file" == *"/components/"* ]]; then
+        ui_component_files="$ui_component_files $file"
+    elif [[ "$file" == *"/screens/"* ]]; then
+        screen_files="$screen_files $file"
+    elif [[ "$file" == *.properties ]] || [[ "$file" == *.gradle* ]] || [[ "$file" == *.toml ]]; then
+        config_files="$config_files $file"
+    else
+        other_files="$other_files $file"
+    fi
+done <<< "$git_status"
+
+commit_count=0
+
+# モデル変更のコミット
+if [ -n "$model_files" ]; then
+    echo ""
+    echo "📦 Committing model changes..."
+    for file in $model_files; do
+        git add "$file"
+    done
+    
+    git commit -m "$(cat <<'EOF'
+feat: update domain and UI models
+
+- Enhanced model structures for better data handling
+- Improved type safety and nullable field handling
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+    )"
+    ((commit_count++))
+fi
+
+# ダイアログコンポーネント変更のコミット
+if [ -n "$dialog_files" ]; then
+    echo ""
+    echo "💬 Committing dialog component changes..."
+    for file in $dialog_files; do
+        git add "$file"
+    done
+    
+    git commit -m "$(cat <<'EOF'
+feat: improve dialog components
+
+- Enhanced dialog layouts and user experience
+- Better form validation and input handling
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+    )"
+    ((commit_count++))
+fi
+
+# UIコンポーネント変更のコミット
+if [ -n "$ui_component_files" ]; then
+    echo ""
+    echo "🎨 Committing UI component changes..."
+    for file in $ui_component_files; do
+        git add "$file"
+    done
+    
+    git commit -m "$(cat <<'EOF'
+feat: update UI components
+
+- Improved component styling and layout
+- Enhanced user interaction feedback
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+    )"
+    ((commit_count++))
+fi
+
+# スクリーン変更のコミット
+if [ -n "$screen_files" ]; then
+    echo ""
+    echo "📱 Committing screen changes..."
+    for file in $screen_files; do
+        git add "$file"
+    done
+    
+    git commit -m "$(cat <<'EOF'
+feat: update screen implementations
+
+- Enhanced screen layouts and navigation
+- Improved state management and data flow
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+    )"
+    ((commit_count++))
+fi
+
+# 設定ファイル変更のコミット
+if [ -n "$config_files" ]; then
+    echo ""
+    echo "⚙️ Committing configuration changes..."
+    for file in $config_files; do
+        git add "$file"
+    done
+    
+    git commit -m "$(cat <<'EOF'
+chore: update project configuration
+
+- Modified build settings and dependencies
+- Updated project properties
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+    )"
+    ((commit_count++))
+fi
+
+# その他のファイル変更のコミット
+if [ -n "$other_files" ]; then
+    echo ""
+    echo "📄 Committing other changes..."
+    for file in $other_files; do
+        git add "$file"
+    done
+    
+    git commit -m "$(cat <<'EOF'
+chore: miscellaneous updates
+
+- Various improvements and fixes
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+    )"
+    ((commit_count++))
+fi
+
+echo ""
+echo "✅ Completed $commit_count commits"
+echo ""
+echo "📜 Recent commits:"
+git log --oneline -"$commit_count"

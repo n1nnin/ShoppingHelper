@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.koin.compose.koinInject
 import xyz.moroku0519.shoppinghelper.model.ItemCategory
 import xyz.moroku0519.shoppinghelper.model.Priority
 import xyz.moroku0519.shoppinghelper.presentation.components.AddItemDialog
@@ -22,6 +23,7 @@ import xyz.moroku0519.shoppinghelper.presentation.components.EditItemDialog
 import xyz.moroku0519.shoppinghelper.presentation.components.ShoppingItemCard
 import xyz.moroku0519.shoppinghelper.presentation.model.ShoppingItemUi
 import xyz.moroku0519.shoppinghelper.presentation.model.ShopUi
+import xyz.moroku0519.shoppinghelper.presentation.viewmodel.ShoppingListViewModel
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,62 +34,22 @@ fun ShoppingListScreen(
     onNavigateToShops: () -> Unit = {},
     onBackClick: (() -> Unit)? = null
 ) {
+    val viewModel: ShoppingListViewModel = koinInject()
+    
     var itemToDelete by remember { mutableStateOf<ShoppingItemUi?>(null) }
     var itemToEdit by remember { mutableStateOf<ShoppingItemUi?>(null) }
     
-    // 全アイテムを保持
-    val allItems = remember {
-        mutableStateOf(
-            listOf(
-                ShoppingItemUi(
-                    id = "1",
-                    name = "牛乳",
-                    isCompleted = false,
-                    shopName = "イオン",
-                    shopId = "shop1",
-                    priority = Priority.NORMAL,
-                    category = ItemCategory.FOOD
-                ),
-                ShoppingItemUi(
-                    id = "2",
-                    name = "風邪薬",
-                    isCompleted = true,
-                    shopName = "ツルハドラッグ",
-                    shopId = "shop2",
-                    priority = Priority.HIGH,
-                    category = ItemCategory.MEDICINE
-                ),
-                ShoppingItemUi(
-                    id = "3",
-                    name = "卵",
-                    isCompleted = false,
-                    shopName = null,
-                    shopId = null,
-                    priority = Priority.URGENT,
-                    category = ItemCategory.FOOD
-                ),
-                ShoppingItemUi(
-                    id = "4",
-                    name = "りんご",
-                    isCompleted = false,
-                    shopName = "セブンイレブン",
-                    shopId = "shop3",
-                    priority = Priority.LOW,
-                    category = ItemCategory.FOOD
-                )
-            )
-        )
-    }.value
+    // ViewModelからデータを取得
+    val items by viewModel.currentListItems.collectAsState()
+    val shopsFromViewModel by viewModel.shops.collectAsState()
     
-    // shopIdに基づいてフィルタリング
-    var items by remember(shopId) {
-        mutableStateOf(
-            if (shopId != null) {
-                allItems.filter { it.shopId == shopId }
-            } else {
-                allItems
-            }
-        )
+    // shopIdが指定されている場合、そのお店の商品のみを表示
+    val filteredItems = remember(items, shopId) {
+        if (shopId != null) {
+            items.filter { it.shopId == shopId }
+        } else {
+            items
+        }
     }
 
     var showAddDialog by remember { mutableStateOf(false) }
@@ -100,7 +62,7 @@ fun ShoppingListScreen(
                     Column {
                         Text(
                             text = if (shopId != null) {
-                                val shopName = shops.firstOrNull { it.id == shopId }?.name ?: "お店"
+                                val shopName = shopsFromViewModel.firstOrNull { it.id == shopId }?.name ?: "お店"
                                 "${shopName}の買い物リスト"
                             } else {
                                 "買い物リスト"
@@ -146,82 +108,62 @@ fun ShoppingListScreen(
             CategoryFilterBar(
                 selectedCategory = selectedCategoryFilter,
                 onCategorySelected = { selectedCategoryFilter = it },
-                items = items
+                items = filteredItems
             )
             
             // アイテムリスト
             ShoppingListContent(
                 items = if (selectedCategoryFilter != null) {
-                    items.filter { it.category == selectedCategoryFilter }
+                    filteredItems.filter { it.category == selectedCategoryFilter }
                 } else {
-                    items
+                    filteredItems
                 },
                 showShopName = shopId == null, // 全体表示の時のみお店名を表示
                 onToggleItem = { id ->
-                    items = items.map { item ->
-                        if (item.id == id) {
-                            item.copy(isCompleted = !item.isCompleted)
-                        } else {
-                            item
-                        }
-                    }
+                    viewModel.toggleItemComplete(id)
                 },
                 onEditItem = { id ->
-                    itemToEdit = items.firstOrNull { it.id == id }
+                    itemToEdit = filteredItems.firstOrNull { it.id == id }
                 },
                 onDeleteItem = { id ->
-                    itemToDelete = items.firstOrNull { it.id == id }
+                    itemToDelete = filteredItems.firstOrNull { it.id == id }
                 }
             )
 
             // アイテム追加ダイアログ
             AddItemDialog(
                 isVisible = showAddDialog,
-                shops = shops,
+                shops = shopsFromViewModel,
                 onDismiss = { showAddDialog = false },
                 onConfirm = { name, selectedShopId, priority, category ->
-                    // 選択されたお店の情報を取得
-                    val selectedShop = shops.firstOrNull { it.id == selectedShopId }
-                    
-                    // 新しいアイテムを追加
-                    val newItem = ShoppingItemUi(
-                        id = UUID.randomUUID().toString(),
+                    viewModel.addItem(
                         name = name,
-                        isCompleted = false,
-                        shopName = selectedShop?.name,
                         shopId = selectedShopId,
                         priority = priority,
                         category = category
                     )
-                    items = items + newItem
-
-                    println("新しいアイテムが追加されました: $newItem")
+                    showAddDialog = false
+                    println("新しいアイテムが追加されました: $name")
                 }
             )
 
             // アイテム編集ダイアログ
             EditItemDialog(
                 item = itemToEdit,
-                shops = shops,
+                shops = shopsFromViewModel,
                 onDismiss = { itemToEdit = null },
                 onConfirm = { name, selectedShopId, priority ->
-                    // 選択されたお店の情報を取得
-                    val selectedShop = shops.firstOrNull { it.id == selectedShopId }
-                    
-                    items = items.map { item ->
-                        if (item.id == itemToEdit?.id) {
-                            item.copy(
-                                name = name,
-                                shopName = selectedShop?.name,
-                                shopId = selectedShopId,
-                                priority = priority
-                            )
-                        } else {
-                            item
-                        }
+                    itemToEdit?.let { item ->
+                        viewModel.updateItem(
+                            itemId = item.id,
+                            name = name,
+                            shopId = selectedShopId,
+                            priority = priority,
+                            category = item.category // 既存のカテゴリを保持
+                        )
                     }
                     itemToEdit = null
-                    println("アイテムが更新されました: ${itemToEdit?.id}")
+                    println("アイテムが更新されました")
                 }
             )
 
@@ -233,7 +175,7 @@ fun ShoppingListScreen(
                     confirmButton = {
                         TextButton(
                             onClick = {
-                                items = items.filter { it.id != item.id }
+                                viewModel.deleteItem(item.id)
                                 itemToDelete = null
                             }
                         ) {

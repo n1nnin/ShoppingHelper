@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.kotlin.compose)
+    // alias(libs.plugins.sqldelight) // temporary removal
 }
 
 kotlin {
@@ -30,6 +31,12 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel.compose)
             implementation(libs.navigation.compose)
 
+            // SQLDelight - temporarily removed
+            // implementation(libs.sqldelight.coroutines)
+            
+            // Koin
+            implementation(libs.koin.core)
+
             // 共通ロジック
             implementation(projects.shared)
         }
@@ -43,6 +50,13 @@ kotlin {
             implementation(libs.maps.compose)
 
             implementation(libs.play.services.location)
+            
+            // SQLDelight Android driver - temporarily removed
+            // implementation(libs.sqldelight.driver.android)
+            
+            // Koin Android
+            implementation(libs.koin.android)
+            implementation(libs.koin.compose)
         }
     }
 }
@@ -85,3 +99,11 @@ android {
         kotlinCompilerExtensionVersion = "1.5.4"
     }
 }
+
+// sqldelight {
+//     databases {
+//         create("ShoppingDatabase") {
+//             packageName.set("xyz.moroku0519.shoppinghelper.database")
+//         }
+//     }
+// }
