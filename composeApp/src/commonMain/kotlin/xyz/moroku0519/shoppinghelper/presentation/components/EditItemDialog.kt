@@ -186,23 +186,48 @@ private fun PrioritySelector(
             text = "優先度",
             style = MaterialTheme.typography.labelLarge
         )
-        Row(
+        // 2行に分けて表示
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Priority.entries.forEach { priority ->
-                FilterChip(
-                    selected = selectedPriority == priority,
-                    onClick = { onPrioritySelected(priority) },
-                    label = {
-                        Text(
-                            text = priority.getDisplayName(),
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center
-                        )
-                    },
-                    modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
-                )
+            // 最初の2つ（緊急、高）
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                listOf(Priority.URGENT, Priority.HIGH).forEach { priority ->
+                    FilterChip(
+                        selected = selectedPriority == priority,
+                        onClick = { onPrioritySelected(priority) },
+                        label = {
+                            Text(
+                                text = priority.getDisplayName(),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+            // 次の2つ（普通、低）
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                listOf(Priority.NORMAL, Priority.LOW).forEach { priority ->
+                    FilterChip(
+                        selected = selectedPriority == priority,
+                        onClick = { onPrioritySelected(priority) },
+                        label = {
+                            Text(
+                                text = priority.getDisplayName(),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
         }
     }

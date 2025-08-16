@@ -1,8 +1,11 @@
 package xyz.moroku0519.shoppinghelper.presentation.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -12,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import xyz.moroku0519.shoppinghelper.model.ItemCategory
 import xyz.moroku0519.shoppinghelper.model.Priority
 import xyz.moroku0519.shoppinghelper.presentation.components.AddItemDialog
 import xyz.moroku0519.shoppinghelper.presentation.components.EditItemDialog
@@ -41,15 +45,17 @@ fun ShoppingListScreen(
                     isCompleted = false,
                     shopName = "イオン",
                     shopId = "shop1",
-                    priority = Priority.NORMAL
+                    priority = Priority.NORMAL,
+                    category = ItemCategory.FOOD
                 ),
                 ShoppingItemUi(
                     id = "2",
-                    name = "パン",
+                    name = "風邪薬",
                     isCompleted = true,
                     shopName = "ツルハドラッグ",
                     shopId = "shop2",
-                    priority = Priority.HIGH
+                    priority = Priority.HIGH,
+                    category = ItemCategory.MEDICINE
                 ),
                 ShoppingItemUi(
                     id = "3",
@@ -57,7 +63,8 @@ fun ShoppingListScreen(
                     isCompleted = false,
                     shopName = null,
                     shopId = null,
-                    priority = Priority.URGENT
+                    priority = Priority.URGENT,
+                    category = ItemCategory.FOOD
                 ),
                 ShoppingItemUi(
                     id = "4",
@@ -65,7 +72,8 @@ fun ShoppingListScreen(
                     isCompleted = false,
                     shopName = "セブンイレブン",
                     shopId = "shop3",
-                    priority = Priority.LOW
+                    priority = Priority.LOW,
+                    category = ItemCategory.FOOD
                 )
             )
         )
@@ -83,6 +91,7 @@ fun ShoppingListScreen(
     }
 
     var showAddDialog by remember { mutableStateOf(false) }
+    var selectedCategoryFilter by remember { mutableStateOf<ItemCategory?>(null) }
 
     Scaffold(
         topBar = {
@@ -133,9 +142,20 @@ fun ShoppingListScreen(
         }
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
+            // カテゴリフィルタ
+            CategoryFilterBar(
+                selectedCategory = selectedCategoryFilter,
+                onCategorySelected = { selectedCategoryFilter = it },
+                items = items
+            )
+            
             // アイテムリスト
             ShoppingListContent(
-                items = items,
+                items = if (selectedCategoryFilter != null) {
+                    items.filter { it.category == selectedCategoryFilter }
+                } else {
+                    items
+                },
                 showShopName = shopId == null, // 全体表示の時のみお店名を表示
                 onToggleItem = { id ->
                     items = items.map { item ->
@@ -159,7 +179,7 @@ fun ShoppingListScreen(
                 isVisible = showAddDialog,
                 shops = shops,
                 onDismiss = { showAddDialog = false },
-                onConfirm = { name, selectedShopId, priority ->
+                onConfirm = { name, selectedShopId, priority, category ->
                     // 選択されたお店の情報を取得
                     val selectedShop = shops.firstOrNull { it.id == selectedShopId }
                     
@@ -170,7 +190,8 @@ fun ShoppingListScreen(
                         isCompleted = false,
                         shopName = selectedShop?.name,
                         shopId = selectedShopId,
-                        priority = priority
+                        priority = priority,
+                        category = category
                     )
                     items = items + newItem
 
@@ -286,6 +307,57 @@ private fun EmptyState(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+        }
+    }
+}
+
+@Composable
+private fun CategoryFilterBar(
+    selectedCategory: ItemCategory?,
+    onCategorySelected: (ItemCategory?) -> Unit,
+    items: List<ShoppingItemUi>,
+    modifier: Modifier = Modifier
+) {
+    // アイテムに存在するカテゴリのみ表示
+    val availableCategories = items.map { it.category }.distinct().sorted()
+    
+    if (availableCategories.isNotEmpty()) {
+        LazyRow(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // 全て表示オプション
+            item {
+                FilterChip(
+                    selected = selectedCategory == null,
+                    onClick = { onCategorySelected(null) },
+                    label = { Text("全て") }
+                )
+            }
+            
+            // 各カテゴリ
+            items(availableCategories) { category ->
+                val itemCount = items.count { it.category == category && !it.isCompleted }
+                FilterChip(
+                    selected = selectedCategory == category,
+                    onClick = { onCategorySelected(category) },
+                    label = { 
+                        Text("${category.displayName} ($itemCount)")
+                    },
+                    leadingIcon = {
+                        Box(
+                            modifier = Modifier
+                                .size(12.dp)
+                                .background(
+                                    color = category.color,
+                                    shape = CircleShape
+                                )
+                        )
+                    }
+                )
+            }
         }
     }
 }

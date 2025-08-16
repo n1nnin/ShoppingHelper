@@ -43,15 +43,29 @@ fun ShoppingItemCard(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 優先度インジケーター
-            Box(
-                modifier = Modifier
-                    .size(4.dp, 40.dp)
-                    .background(
-                        color = item.priorityColor,
-                        shape = RoundedCornerShape(2.dp)
-                    )
-            )
+            // カテゴリ・優先度インジケーター
+            Column(
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                // カテゴリインジケーター
+                Box(
+                    modifier = Modifier
+                        .size(4.dp, 18.dp)
+                        .background(
+                            color = item.categoryColor,
+                            shape = RoundedCornerShape(2.dp)
+                        )
+                )
+                // 優先度インジケーター
+                Box(
+                    modifier = Modifier
+                        .size(4.dp, 18.dp)
+                        .background(
+                            color = item.priorityColor,
+                            shape = RoundedCornerShape(2.dp)
+                        )
+                )
+            }
 
             Spacer(modifier = Modifier.width(12.dp))
 

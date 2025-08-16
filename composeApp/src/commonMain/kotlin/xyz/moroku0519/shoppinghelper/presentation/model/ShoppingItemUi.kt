@@ -8,6 +8,7 @@ import shoppinghelper.composeapp.generated.resources.priority_high
 import shoppinghelper.composeapp.generated.resources.priority_low
 import shoppinghelper.composeapp.generated.resources.priority_normal
 import shoppinghelper.composeapp.generated.resources.priority_urgent
+import xyz.moroku0519.shoppinghelper.model.ItemCategory
 import xyz.moroku0519.shoppinghelper.model.Priority
 
 data class ShoppingItemUi(
@@ -16,9 +17,11 @@ data class ShoppingItemUi(
     val isCompleted: Boolean,
     val shopName: String?,
     val shopId: String?,
-    val priority: Priority
+    val priority: Priority,
+    val category: ItemCategory = ItemCategory.OTHER
 ) {
     val priorityColor: Color = priority.color
+    val categoryColor: Color = category.color
 }
 
 @Composable

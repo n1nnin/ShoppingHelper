@@ -8,5 +8,6 @@ data class ShoppingItem(
     val isCompleted: Boolean = false,
     val shopId: String? = null,
     val priority: Priority = Priority.NORMAL,
+    val category: ItemCategory = ItemCategory.OTHER,
     val createdAt: Long = currentTimeMillis()
 )
