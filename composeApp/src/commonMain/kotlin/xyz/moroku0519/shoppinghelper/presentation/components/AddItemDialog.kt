@@ -31,13 +31,12 @@ import xyz.moroku0519.shoppinghelper.presentation.model.getDisplayName
 @Composable
 fun AddItemDialog(
     isVisible: Boolean,
-    shops: List<ShopUi> = emptyList(),
+    currentShopId: String? = null,
     onDismiss: () -> Unit,
-    onConfirm: (name: String, shopId: String?, priority: Priority, category: ItemCategory) -> Unit
+    onConfirm: (name: String, priority: Priority, category: ItemCategory) -> Unit
 ) {
     if (isVisible) {
         var itemName by remember { mutableStateOf("") }
-        var selectedShopId by remember { mutableStateOf<String?>(null) }
         var selectedPriority by remember { mutableStateOf(Priority.NORMAL) }
         var selectedCategory by remember { mutableStateOf(ItemCategory.OTHER) }
         var showError by remember { mutableStateOf(false) }
@@ -46,7 +45,6 @@ fun AddItemDialog(
         LaunchedEffect(isVisible) {
             if (isVisible) {
                 itemName = ""
-                selectedShopId = null
                 selectedPriority = Priority.NORMAL
                 selectedCategory = ItemCategory.OTHER
                 showError = false
@@ -79,7 +77,6 @@ fun AddItemDialog(
                                         if (itemName.isNotBlank()) {
                                             onConfirm(
                                                 itemName.trim(),
-                                                selectedShopId,
                                                 selectedPriority,
                                                 selectedCategory
                                             )
@@ -120,13 +117,6 @@ fun AddItemDialog(
                             } else null
                         )
 
-                        // お店選択
-                        ShopSelector(
-                            shops = shops,
-                            selectedShopId = selectedShopId,
-                            onShopSelected = { selectedShopId = it }
-                        )
-
                         // カテゴリ選択
                         CategorySelector(
                             selectedCategory = selectedCategory,
@@ -140,80 +130,6 @@ fun AddItemDialog(
                         )
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ShopSelector(
-    shops: List<ShopUi>,
-    selectedShopId: String?,
-    onShopSelected: (String?) -> Unit
-) {
-    Column {
-        Text(
-            text = "お店",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // お店なしオプション
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .selectable(
-                    selected = selectedShopId == null,
-                    onClick = { onShopSelected(null) }
-                )
-                .padding(vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            RadioButton(
-                selected = selectedShopId == null,
-                onClick = { onShopSelected(null) }
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "お店を選択しない",
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-
-        // お店リスト
-        shops.forEach { shop ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .selectable(
-                        selected = selectedShopId == shop.id,
-                        onClick = { onShopSelected(shop.id) }
-                    )
-                    .padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                RadioButton(
-                    selected = selectedShopId == shop.id,
-                    onClick = { onShopSelected(shop.id) }
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                
-                // カテゴリカラー
-                Box(
-                    modifier = Modifier
-                        .size(12.dp)
-                        .background(
-                            color = shop.category.color,
-                            shape = CircleShape
-                        )
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                
-                Text(
-                    text = shop.name,
-                    style = MaterialTheme.typography.bodyMedium
-                )
             }
         }
     }
@@ -276,8 +192,9 @@ private fun AddItemDialogPreview() {
         Box(modifier = Modifier.fillMaxSize()) {
             AddItemDialog(
                 isVisible = true,
+                currentShopId = "shop1",
                 onDismiss = {},
-                onConfirm = { _, _, _, _ -> }
+                onConfirm = { _, _, _ -> }
             )
         }
     }

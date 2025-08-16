@@ -19,13 +19,11 @@ import xyz.moroku0519.shoppinghelper.presentation.model.getDisplayName
 @Composable
 fun EditItemDialog(
     item: ShoppingItemUi?,
-    shops: List<ShopUi> = emptyList(),
     onDismiss: () -> Unit,
-    onConfirm: (name: String, shopId: String?, priority: Priority) -> Unit
+    onConfirm: (name: String, priority: Priority) -> Unit
 ) {
     if (item != null) {
         var itemName by remember(item) { mutableStateOf(item.name) }
-        var selectedShopId by remember(item) { mutableStateOf(item.shopId) }
         var selectedPriority by remember(item) { mutableStateOf(item.priority) }
         var showError by remember { mutableStateOf(false) }
 
@@ -59,12 +57,10 @@ fun EditItemDialog(
                         } else null
                     )
 
-                    // お店選択
-                    ShopSelector(
-                        shops = shops,
-                        selectedShopId = selectedShopId,
-                        onShopSelected = { selectedShopId = it }
-                    )
+                    // 所属するお店（変更不可）
+                    if (item.shopName != null) {
+                        CurrentShopInfo(shopName = item.shopName)
+                    }
 
                     // 優先度選択
                     PrioritySelector(
@@ -79,7 +75,6 @@ fun EditItemDialog(
                         if (itemName.isNotBlank()) {
                             onConfirm(
                                 itemName.trim(),
-                                selectedShopId,
                                 selectedPriority
                             )
                             onDismiss()
@@ -101,72 +96,36 @@ fun EditItemDialog(
 }
 
 @Composable
-private fun ShopSelector(
-    shops: List<ShopUi>,
-    selectedShopId: String?,
-    onShopSelected: (String?) -> Unit
-) {
+private fun CurrentShopInfo(shopName: String) {
     Column {
         Text(
-            text = "お店",
+            text = "所属するお店",
             style = MaterialTheme.typography.labelLarge
         )
         Spacer(modifier = Modifier.height(8.dp))
         
-        // お店なしオプション
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .selectable(
-                    selected = selectedShopId == null,
-                    onClick = { onShopSelected(null) }
-                )
-                .padding(vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
         ) {
-            RadioButton(
-                selected = selectedShopId == null,
-                onClick = { onShopSelected(null) }
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "お店を選択しない",
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-        
-        // お店リスト
-        shops.forEach { shop ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .selectable(
-                        selected = selectedShopId == shop.id,
-                        onClick = { onShopSelected(shop.id) }
-                    )
-                    .padding(vertical = 4.dp),
+                    .padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                RadioButton(
-                    selected = selectedShopId == shop.id,
-                    onClick = { onShopSelected(shop.id) }
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                
-                // カテゴリカラー
-                Box(
-                    modifier = Modifier
-                        .size(12.dp)
-                        .background(
-                            color = shop.category.color,
-                            shape = CircleShape
-                        )
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                
                 Text(
-                    text = shop.name,
-                    style = MaterialTheme.typography.bodyMedium
+                    text = shopName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = "（変更不可）",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )
             }
         }
@@ -248,7 +207,7 @@ private fun EditItemDialogPreview() {
                     priority = Priority.NORMAL
                 ),
                 onDismiss = {},
-                onConfirm = { _, _, _ -> }
+                onConfirm = { _, _ -> }
             )
         }
     }
