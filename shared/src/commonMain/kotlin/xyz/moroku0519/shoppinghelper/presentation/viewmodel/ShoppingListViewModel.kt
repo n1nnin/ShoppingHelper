@@ -150,9 +150,14 @@ class ShoppingListViewModel(
     
     fun deleteCompletedItems() {
         viewModelScope.launch {
-            val activeList = repository.getActiveList().first()
-            if (activeList != null) {
-                repository.deleteCompletedItems(activeList.id)
+            val listId = _selectedListId.value
+            if (listId != null) {
+                repository.deleteCompletedItems(listId)
+            } else {
+                val activeList = repository.getActiveList().first()
+                if (activeList != null) {
+                    repository.deleteCompletedItems(activeList.id)
+                }
             }
         }
     }
