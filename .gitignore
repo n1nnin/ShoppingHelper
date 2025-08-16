@@ -125,3 +125,6 @@ konan/
 # Cache files
 .build-cache/
 .kotlin/
+
+# Project specific
+spec.md
