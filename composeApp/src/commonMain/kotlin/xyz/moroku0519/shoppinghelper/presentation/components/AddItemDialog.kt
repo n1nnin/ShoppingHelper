@@ -11,17 +11,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import xyz.moroku0519.shoppinghelper.model.Priority
+import xyz.moroku0519.shoppinghelper.presentation.model.ShopUi
 import xyz.moroku0519.shoppinghelper.presentation.model.getDisplayName
 
 @Composable
 fun AddItemDialog(
     isVisible: Boolean,
+    shops: List<ShopUi> = emptyList(),
     onDismiss: () -> Unit,
-    onConfirm: (name: String, shopName: String?, priority: Priority) -> Unit
+    onConfirm: (name: String, shopId: String?, priority: Priority) -> Unit
 ) {
     if (isVisible) {
         var itemName by remember { mutableStateOf("") }
-        var shopName by remember { mutableStateOf("") }
+        var selectedShopId by remember { mutableStateOf<String?>(null) }
         var selectedPriority by remember { mutableStateOf(Priority.NORMAL) }
         var showError by remember { mutableStateOf(false) }
 
@@ -29,7 +31,7 @@ fun AddItemDialog(
         LaunchedEffect(isVisible) {
             if (isVisible) {
                 itemName = ""
-                shopName = ""
+                selectedShopId = null
                 selectedPriority = Priority.NORMAL
                 showError = false
             }
@@ -62,14 +64,11 @@ fun AddItemDialog(
                         } else null
                     )
 
-                    // お店名入力（オプション）
-                    OutlinedTextField(
-                        value = shopName,
-                        onValueChange = { shopName = it },
-                        label = { Text("お店名（オプション）") },
-                        placeholder = { Text("例: スーパーマーケット") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                    // お店選択
+                    ShopSelector(
+                        shops = shops,
+                        selectedShopId = selectedShopId,
+                        onShopSelected = { selectedShopId = it }
                     )
 
                     // 優先度選択
@@ -85,7 +84,7 @@ fun AddItemDialog(
                         if (itemName.isNotBlank()) {
                             onConfirm(
                                 itemName.trim(),
-                                shopName.trim().takeIf { it.isNotEmpty() },
+                                selectedShopId,
                                 selectedPriority
                             )
                             onDismiss()
@@ -103,6 +102,80 @@ fun AddItemDialog(
                 }
             }
         )
+    }
+}
+
+@Composable
+private fun ShopSelector(
+    shops: List<ShopUi>,
+    selectedShopId: String?,
+    onShopSelected: (String?) -> Unit
+) {
+    Column {
+        Text(
+            text = "お店",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // お店なしオプション
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .selectable(
+                    selected = selectedShopId == null,
+                    onClick = { onShopSelected(null) }
+                )
+                .padding(vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            RadioButton(
+                selected = selectedShopId == null,
+                onClick = { onShopSelected(null) }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "お店を選択しない",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
+        // お店リスト
+        shops.forEach { shop ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .selectable(
+                        selected = selectedShopId == shop.id,
+                        onClick = { onShopSelected(shop.id) }
+                    )
+                    .padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RadioButton(
+                    selected = selectedShopId == shop.id,
+                    onClick = { onShopSelected(shop.id) }
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                
+                // カテゴリカラー
+                Box(
+                    modifier = Modifier
+                        .size(12.dp)
+                        .background(
+                            color = shop.category.color,
+                            shape = CircleShape
+                        )
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                
+                Text(
+                    text = shop.name,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
     }
 }
 
