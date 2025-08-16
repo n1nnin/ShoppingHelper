@@ -163,6 +163,18 @@ class ShoppingListViewModel(
         }
     }
     
+    fun updateList(list: ShoppingList) {
+        viewModelScope.launch {
+            repository.updateList(list)
+        }
+    }
+    
+    fun deleteList(listId: String) {
+        viewModelScope.launch {
+            repository.deleteList(listId)
+        }
+    }
+    
     fun addShop(
         name: String,
         address: String?,
