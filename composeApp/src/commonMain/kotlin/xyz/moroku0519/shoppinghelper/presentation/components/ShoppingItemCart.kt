@@ -25,7 +25,8 @@ fun ShoppingItemCard(
     onToggle: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showShopName: Boolean = true
 ) {
     Card(
         modifier = modifier
@@ -74,14 +75,16 @@ fun ShoppingItemCard(
                     else MaterialTheme.colorScheme.onSurface
                 )
 
-                // お店名表示
-                item.shopName?.let { shopName ->
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = shopName,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                // お店名表示（全体リスト表示時のみ）
+                if (showShopName) {
+                    item.shopName?.let { shopName ->
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = shopName,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
 
                 // 優先度表示（String Resourceを使用）

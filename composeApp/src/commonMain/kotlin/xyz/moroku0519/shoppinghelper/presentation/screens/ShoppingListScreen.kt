@@ -39,7 +39,7 @@ fun ShoppingListScreen(
                     id = "1",
                     name = "牛乳",
                     isCompleted = false,
-                    shopName = "スーパーマーケット",
+                    shopName = "イオン",
                     shopId = "shop1",
                     priority = Priority.NORMAL
                 ),
@@ -47,7 +47,7 @@ fun ShoppingListScreen(
                     id = "2",
                     name = "パン",
                     isCompleted = true,
-                    shopName = "ベーカリー",
+                    shopName = "ツルハドラッグ",
                     shopId = "shop2",
                     priority = Priority.HIGH
                 ),
@@ -63,7 +63,7 @@ fun ShoppingListScreen(
                     id = "4",
                     name = "りんご",
                     isCompleted = false,
-                    shopName = "フルーツショップ",
+                    shopName = "セブンイレブン",
                     shopId = "shop3",
                     priority = Priority.LOW
                 )
@@ -136,6 +136,7 @@ fun ShoppingListScreen(
             // アイテムリスト
             ShoppingListContent(
                 items = items,
+                showShopName = shopId == null, // 全体表示の時のみお店名を表示
                 onToggleItem = { id ->
                     items = items.map { item ->
                         if (item.id == id) {
@@ -232,6 +233,7 @@ fun ShoppingListScreen(
 @Composable
 private fun ShoppingListContent(
     items: List<ShoppingItemUi>,
+    showShopName: Boolean = true,
     onToggleItem: (String) -> Unit,
     onEditItem: (String) -> Unit,
     onDeleteItem: (String) -> Unit,
@@ -254,7 +256,8 @@ private fun ShoppingListContent(
                     item = item,
                     onToggle = { onToggleItem(item.id) },
                     onEdit = { onEditItem(item.id) },
-                    onDelete = { onDeleteItem(item.id) }
+                    onDelete = { onDeleteItem(item.id) },
+                    showShopName = showShopName
                 )
             }
         }
