@@ -164,7 +164,9 @@ class ShoppingListViewModel(
     
     fun createList(name: String) {
         viewModelScope.launch {
+            println("ViewModelでリスト作成開始: $name")
             repository.createList(name)
+            println("ViewModelでリスト作成完了: $name")
         }
     }
     

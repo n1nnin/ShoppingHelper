@@ -42,7 +42,7 @@ fun ShopCard(
                 modifier = Modifier
                     .size(4.dp, 48.dp)
                     .background(
-                        color = shop.categoryColor,
+                        color = shop.category.color,
                         shape = RoundedCornerShape(2.dp)
                     )
             )
@@ -54,7 +54,7 @@ fun ShopCard(
                 imageVector = getCategoryIcon(shop.category),
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
-                tint = shop.categoryColor
+                tint = shop.category.color
             )
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -84,7 +84,7 @@ fun ShopCard(
                 Text(
                     text = shop.category.getDisplayName(),
                     style = MaterialTheme.typography.bodySmall,
-                    color = shop.categoryColor
+                    color = shop.category.color
                 )
             }
 

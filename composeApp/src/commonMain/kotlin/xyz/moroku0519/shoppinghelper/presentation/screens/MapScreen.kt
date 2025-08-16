@@ -219,7 +219,7 @@ private fun PreviewMapContent(
                             Box(
                                 modifier = Modifier
                                     .size(12.dp)
-                                    .background(shop.categoryColor, CircleShape)
+                                    .background(shop.category.color, CircleShape)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(

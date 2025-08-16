@@ -6,30 +6,24 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import xyz.moroku0519.shoppinghelper.model.ShoppingList
+import xyz.moroku0519.shoppinghelper.util.currentTimeMillis
 
 @Composable
-fun AddListDialog(
-    isVisible: Boolean,
+fun EditListDialog(
+    list: ShoppingList?,
     onDismiss: () -> Unit,
     onConfirm: (name: String) -> Unit
 ) {
-    if (isVisible) {
-        var listName by remember { mutableStateOf("") }
+    if (list != null) {
+        var listName by remember(list) { mutableStateOf(list.name) }
         var showError by remember { mutableStateOf(false) }
-
-        // ダイアログが開くたびに状態をリセット
-        LaunchedEffect(isVisible) {
-            if (isVisible) {
-                listName = ""
-                showError = false
-            }
-        }
 
         AlertDialog(
             onDismissRequest = onDismiss,
             title = {
                 Text(
-                    text = "新しいリストを作成",
+                    text = "リストを編集",
                     style = MaterialTheme.typography.headlineSmall
                 )
             },
@@ -54,11 +48,25 @@ fun AddListDialog(
                         } else null
                     )
 
-                    Text(
-                        text = "ヒント: 用途や期間でリストを分けると管理しやすくなります",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    // リスト情報
+                    Column {
+                        Text(
+                            text = "リスト情報",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "ステータス: ${if (list.isActive) "アクティブ" else "アーカイブ"}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "作成日: ${formatTimestamp(list.createdAt)}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             },
             confirmButton = {
@@ -71,7 +79,7 @@ fun AddListDialog(
                         }
                     }
                 ) {
-                    Text("作成")
+                    Text("更新")
                 }
             },
             dismissButton = {
@@ -83,12 +91,24 @@ fun AddListDialog(
     }
 }
 
+private fun formatTimestamp(timestamp: Long): String {
+    val date = java.util.Date(timestamp)
+    val formatter = java.text.SimpleDateFormat("yyyy/MM/dd HH:mm", java.util.Locale.getDefault())
+    return formatter.format(date)
+}
+
 @Preview
 @Composable
-private fun AddListDialogPreview() {
+private fun EditListDialogPreview() {
     MaterialTheme {
-        AddListDialog(
-            isVisible = true,
+        EditListDialog(
+            list = ShoppingList(
+                id = "1",
+                name = "今週の買い物",
+                isActive = true,
+                createdAt = currentTimeMillis(),
+                updatedAt = currentTimeMillis()
+            ),
             onDismiss = {},
             onConfirm = {}
         )

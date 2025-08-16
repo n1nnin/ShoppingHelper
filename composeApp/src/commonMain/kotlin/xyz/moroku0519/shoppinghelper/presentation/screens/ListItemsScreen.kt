@@ -125,7 +125,7 @@ fun ListItemsScreen(
                     item {
                         ShopSection(
                             shopName = shop?.name ?: "お店未指定",
-                            shopColor = shop?.categoryColor ?: MaterialTheme.colorScheme.outline,
+                            shopColor = shop?.category?.color ?: MaterialTheme.colorScheme.outline,
                             itemCount = shopItems.size,
                             completedCount = shopItems.count { it.isCompleted }
                         )

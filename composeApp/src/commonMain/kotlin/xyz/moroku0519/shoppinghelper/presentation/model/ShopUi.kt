@@ -18,9 +18,6 @@ data class ShopUi(
     val latitude: Double? = null,
     val longitude: Double? = null,
 ) {
-    val categoryColor: Color
-        get() = category.color
-    
     companion object {
         fun fromShop(shop: Shop, pendingItemsCount: Int = 0, totalItemsCount: Int = 0): ShopUi {
             return ShopUi(
@@ -62,7 +59,7 @@ fun Shop.toUiModel(pendingItemsCount: Int = 0, totalItemsCount: Int = 0): ShopUi
         category = category,
         pendingItemsCount = pendingItemsCount,
         totalItemsCount = totalItemsCount,
-        latitude = latitude,
-        longitude = longitude
+        latitude = location?.latitude,
+        longitude = location?.longitude
     )
 }

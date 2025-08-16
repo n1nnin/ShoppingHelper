@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import org.koin.compose.koinInject
 import xyz.moroku0519.shoppinghelper.model.ShoppingList
 import xyz.moroku0519.shoppinghelper.presentation.components.AddListDialog
+import xyz.moroku0519.shoppinghelper.presentation.components.EditListDialog
 import xyz.moroku0519.shoppinghelper.presentation.components.ShoppingListCard
 import xyz.moroku0519.shoppinghelper.presentation.viewmodel.ShoppingListViewModel
 
@@ -32,6 +33,7 @@ fun ShoppingListManagementScreen(
     
     var showAddDialog by remember { mutableStateOf(false) }
     var listToDelete by remember { mutableStateOf<ShoppingList?>(null) }
+    var listToEdit by remember { mutableStateOf<ShoppingList?>(null) }
     var showArchivedLists by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -72,7 +74,7 @@ fun ShoppingListManagementScreen(
             }
         }
     ) { paddingValues ->
-        val listsToShow = if (showArchivedLists) allLists else activeLists
+        val listsToShow = if (showArchivedLists) allLists else allLists.filter { it.isActive }
         
         if (listsToShow.isEmpty()) {
             EmptyListsState(
@@ -98,7 +100,7 @@ fun ShoppingListManagementScreen(
                         itemCount = 0, // TODO: 実際のアイテム数を取得
                         completedItemCount = 0, // TODO: 実際の完了アイテム数を取得
                         onListClick = { onListSelected(list.id) },
-                        onEditClick = { /* TODO: 編集機能 */ },
+                        onEditClick = { listToEdit = list },
                         onDeleteClick = { listToDelete = list },
                         onArchiveClick = { 
                             viewModel.updateList(list.copy(isActive = !list.isActive))
@@ -115,6 +117,21 @@ fun ShoppingListManagementScreen(
             onConfirm = { name ->
                 viewModel.createList(name)
                 showAddDialog = false
+            }
+        )
+
+        // リスト編集ダイアログ
+        EditListDialog(
+            list = listToEdit,
+            onDismiss = { listToEdit = null },
+            onConfirm = { name ->
+                listToEdit?.let { list ->
+                    viewModel.updateList(list.copy(
+                        name = name,
+                        updatedAt = xyz.moroku0519.shoppinghelper.util.currentTimeMillis()
+                    ))
+                }
+                listToEdit = null
             }
         )
 

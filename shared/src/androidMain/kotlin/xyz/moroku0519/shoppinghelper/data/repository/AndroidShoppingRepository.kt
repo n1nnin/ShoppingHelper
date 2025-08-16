@@ -69,15 +69,20 @@ class AndroidShoppingRepository(context: Context) : ShoppingRepository {
     // Load/Save functions
     private fun loadLists(): List<ShoppingList> {
         return try {
-            val json = prefs.getString("lists", "[]") ?: "[]"
-            Json.decodeFromString<List<ShoppingList>>(json)
+            val jsonString = prefs.getString("lists", "[]") ?: "[]"
+            val lists = json.decodeFromString<List<ShoppingList>>(jsonString)
+            println("リストをロード: ${lists.size}件")
+            lists
         } catch (e: Exception) {
+            println("リストのロードエラー: ${e.message}")
             emptyList()
         }
     }
     
     private fun saveLists() {
-        prefs.edit().putString("lists", json.encodeToString(_lists.value)).apply()
+        val jsonString = json.encodeToString(_lists.value)
+        prefs.edit().putString("lists", jsonString).apply()
+        println("リストを保存: ${_lists.value.size}件")
     }
     
     private fun loadItems(): List<ShoppingItem> {
@@ -130,12 +135,13 @@ class AndroidShoppingRepository(context: Context) : ShoppingRepository {
         val newList = ShoppingList(
             id = generateId(),
             name = name,
-            isActive = false,
+            isActive = true,  // 新しいリストをアクティブに設定
             createdAt = currentTimeMillis(),
             updatedAt = currentTimeMillis()
         )
         _lists.value = _lists.value + newList
         saveLists()
+        println("リスト作成: ${newList.name}, 合計リスト数: ${_lists.value.size}")
         return newList
     }
     
