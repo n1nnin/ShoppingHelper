@@ -14,18 +14,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import xyz.moroku0519.shoppinghelper.model.Priority
 import xyz.moroku0519.shoppinghelper.presentation.components.AddItemDialog
+import xyz.moroku0519.shoppinghelper.presentation.components.EditItemDialog
 import xyz.moroku0519.shoppinghelper.presentation.components.ShoppingItemCard
 import xyz.moroku0519.shoppinghelper.presentation.model.ShoppingItemUi
+import xyz.moroku0519.shoppinghelper.presentation.model.ShopUi
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShoppingListScreen(
     shopId: String? = null,
+    shops: List<ShopUi> = emptyList(),
     onNavigateToShops: () -> Unit = {},
     onBackClick: (() -> Unit)? = null
 ) {
     var itemToDelete by remember { mutableStateOf<ShoppingItemUi?>(null) }
+    var itemToEdit by remember { mutableStateOf<ShoppingItemUi?>(null) }
     
     // 全アイテムを保持
     val allItems = remember {
@@ -87,7 +91,7 @@ fun ShoppingListScreen(
                     Column {
                         Text(
                             text = if (shopId != null) {
-                                val shopName = items.firstOrNull { it.shopId == shopId }?.shopName ?: "お店"
+                                val shopName = shops.firstOrNull { it.id == shopId }?.name ?: "お店"
                                 "${shopName}の買い物リスト"
                             } else {
                                 "買い物リスト"
@@ -142,7 +146,7 @@ fun ShoppingListScreen(
                     }
                 },
                 onEditItem = { id ->
-                    println("アイテム編集: $id")
+                    itemToEdit = items.firstOrNull { it.id == id }
                 },
                 onDeleteItem = { id ->
                     itemToDelete = items.firstOrNull { it.id == id }
@@ -152,25 +156,50 @@ fun ShoppingListScreen(
             // アイテム追加ダイアログ
             AddItemDialog(
                 isVisible = showAddDialog,
+                shops = shops,
                 onDismiss = { showAddDialog = false },
-                onConfirm = { name, priority ->
+                onConfirm = { name, selectedShopId, priority ->
+                    // 選択されたお店の情報を取得
+                    val selectedShop = shops.firstOrNull { it.id == selectedShopId }
+                    
                     // 新しいアイテムを追加
                     val newItem = ShoppingItemUi(
                         id = UUID.randomUUID().toString(),
                         name = name,
                         isCompleted = false,
-                        shopName = if (shopId != null && shopId != "all") {
-                            // 現在のショップ名を使用
-                            items.firstOrNull { it.shopId == shopId }?.shopName
-                        } else {
-                            null
-                        },
-                        shopId = if (shopId != null && shopId != "all") shopId else null,
+                        shopName = selectedShop?.name,
+                        shopId = selectedShopId,
                         priority = priority
                     )
                     items = items + newItem
 
                     println("新しいアイテムが追加されました: $newItem")
+                }
+            )
+
+            // アイテム編集ダイアログ
+            EditItemDialog(
+                item = itemToEdit,
+                shops = shops,
+                onDismiss = { itemToEdit = null },
+                onConfirm = { name, selectedShopId, priority ->
+                    // 選択されたお店の情報を取得
+                    val selectedShop = shops.firstOrNull { it.id == selectedShopId }
+                    
+                    items = items.map { item ->
+                        if (item.id == itemToEdit?.id) {
+                            item.copy(
+                                name = name,
+                                shopName = selectedShop?.name,
+                                shopId = selectedShopId,
+                                priority = priority
+                            )
+                        } else {
+                            item
+                        }
+                    }
+                    itemToEdit = null
+                    println("アイテムが更新されました: ${itemToEdit?.id}")
                 }
             )
 

@@ -27,6 +27,7 @@ fun ShopCategory.getDisplayName(): String {
         ShopCategory.GROCERY -> stringResource(Res.string.shop_category_grocery)
         ShopCategory.PHARMACY -> stringResource(Res.string.shop_category_pharmacy)
         ShopCategory.CONVENIENCE -> stringResource(Res.string.shop_category_convenience)
+        ShopCategory.BAKERY -> stringResource(Res.string.shop_category_bakery)
         ShopCategory.DEPARTMENT -> stringResource(Res.string.shop_category_department)
         ShopCategory.ELECTRONICS -> stringResource(Res.string.shop_category_electronics)
         ShopCategory.CLOTHING -> stringResource(Res.string.shop_category_clothing)
@@ -39,7 +40,7 @@ fun Shop.toUiModel(pendingItemsCount: Int = 0, totalItemsCount: Int = 0): ShopUi
     return ShopUi(
         id = id,
         name = name,
-        address = address,
+        address = address ?: "",
         category = category,
         pendingItemsCount = pendingItemsCount,
         totalItemsCount = totalItemsCount,

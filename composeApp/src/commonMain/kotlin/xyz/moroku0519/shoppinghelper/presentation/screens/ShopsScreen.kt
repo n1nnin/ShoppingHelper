@@ -17,54 +17,33 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import xyz.moroku0519.shoppinghelper.model.Shop
 import xyz.moroku0519.shoppinghelper.model.ShopCategory
 import xyz.moroku0519.shoppinghelper.presentation.components.AddShopDialog
+import xyz.moroku0519.shoppinghelper.presentation.components.EditShopDialog
 import xyz.moroku0519.shoppinghelper.presentation.components.GeofenceHandler
 import xyz.moroku0519.shoppinghelper.presentation.components.GeofenceTestButton
 import xyz.moroku0519.shoppinghelper.presentation.components.ShopCard
 import xyz.moroku0519.shoppinghelper.presentation.model.ShopUi
 import xyz.moroku0519.shoppinghelper.presentation.model.toUiModel
+import xyz.moroku0519.shoppinghelper.util.currentTimeMillis
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShopsScreen(
+    initialShops: List<ShopUi> = emptyList(),
+    onShopsUpdated: (List<ShopUi>) -> Unit = {},
     onBackClick: () -> Unit,
     onNavigateToMap: () -> Unit = {},
     onShopClick: (String) -> Unit = {}
 ) {
     // 状態管理：お店リスト
-    var shops by remember {
-        mutableStateOf(
-            listOf(
-                Shop(
-                    id = "shop1",
-                    name = "イオン",
-                    address = "東京都渋谷区神南1-1-1",
-                    category = ShopCategory.GROCERY,
-                    latitude = 35.6598, longitude = 139.7006
-                ).toUiModel(pendingItemsCount = 3, totalItemsCount = 8),
-                Shop(
-                    id = "shop2",
-                    name = "ツルハドラッグ",
-                    address = "東京都新宿区新宿3-1-1",
-                    category = ShopCategory.PHARMACY,
-                    latitude = 35.6896, longitude = 139.7006
-                ).toUiModel(pendingItemsCount = 1, totalItemsCount = 2),
-                Shop(
-                    id = "shop3",
-                    name = "セブンイレブン",
-                    address = "東京都千代田区丸の内1-1-1",
-                    category = ShopCategory.CONVENIENCE,
-                    latitude = 35.6812, longitude = 139.7671
-                ).toUiModel(pendingItemsCount = 0, totalItemsCount = 1)
-            )
-        )
-    }
+    var shops by remember { mutableStateOf(initialShops) }
 
     // Geofence自動設定
     GeofenceHandler(shops)
 
     // 削除確認ダイアログ用の状態
     var shopToDelete by remember { mutableStateOf<ShopUi?>(null) }
+    var shopToEdit by remember { mutableStateOf<ShopUi?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -124,8 +103,7 @@ fun ShopsScreen(
                                 onShopClick(shop.id)
                             },
                             onEditClick = {
-                                println("お店編集: ${shop.name}")
-                                // TODO: お店編集ダイアログを表示
+                                shopToEdit = shop
                             },
                             onDeleteClick = {
                                 shopToDelete = shop
@@ -156,13 +134,42 @@ fun ShopsScreen(
                         category = category,
                         longitude = randomLng,
                         latitude = randomLat,
-                        createdAt = System.currentTimeMillis()
+                        createdAt = currentTimeMillis()
                     ).toUiModel()
 
                     shops = shops + newShop
+                    onShopsUpdated(shops)
                     showAddDialog = false
 
                     println("新しいお店が追加されました: $newShop")
+                }
+            )
+
+            // お店編集ダイアログ
+            EditShopDialog(
+                shop = shopToEdit,
+                onDismiss = { shopToEdit = null },
+                onConfirm = { name, address, category ->
+                    shops = shops.map { shop ->
+                        if (shop.id == shopToEdit?.id) {
+                            Shop(
+                                id = shop.id,
+                                name = name,
+                                address = address,
+                                category = category,
+                                latitude = shop.latitude,
+                                longitude = shop.longitude
+                            ).toUiModel(
+                                pendingItemsCount = shop.pendingItemsCount,
+                                totalItemsCount = shop.totalItemsCount
+                            )
+                        } else {
+                            shop
+                        }
+                    }
+                    shopToEdit = null
+                    onShopsUpdated(shops)
+                    println("お店が更新されました: ${shopToEdit?.name}")
                 }
             )
 
@@ -183,6 +190,7 @@ fun ShopsScreen(
                         TextButton(
                             onClick = {
                                 shops = shops.filter { it.id != shop.id }
+                                onShopsUpdated(shops)
                                 shopToDelete = null
                                 println("お店削除: ${shop.name}")
                             }

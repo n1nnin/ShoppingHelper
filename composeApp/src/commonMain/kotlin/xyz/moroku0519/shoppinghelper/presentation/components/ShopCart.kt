@@ -137,6 +137,7 @@ private fun getCategoryIcon(category: ShopCategory) = when (category) {
     ShopCategory.GROCERY -> Icons.Default.ShoppingCart
     ShopCategory.PHARMACY -> Icons.Default.Phone
     ShopCategory.CONVENIENCE -> Icons.Default.AccountCircle
+    ShopCategory.BAKERY -> Icons.Default.ShoppingCart
     ShopCategory.DEPARTMENT -> Icons.Default.Delete
     ShopCategory.ELECTRONICS -> Icons.Default.Search
     ShopCategory.CLOTHING -> Icons.Default.Close
