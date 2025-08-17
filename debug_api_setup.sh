@@ -76,20 +76,63 @@ else
     echo "❌ Build failed - check Gradle configuration"
 fi
 
+# Check Supabase configuration
+echo ""
+echo "🌐 Supabase Configuration (Phase 2)"
+echo "==================================="
+
+if grep -q "SUPABASE_URL=" local.properties; then
+    echo "✅ SUPABASE_URL found in local.properties"
+    supabase_url=$(grep "SUPABASE_URL=" local.properties | cut -d'=' -f2)
+    if [[ $supabase_url == *"your-project-id"* ]]; then
+        echo "⚠️  SUPABASE_URL is still a placeholder"
+        echo "   Update with actual Supabase project URL"
+    else
+        echo "✅ SUPABASE_URL appears to be configured"
+    fi
+else
+    echo "❌ SUPABASE_URL not found in local.properties"
+    echo "   Add: SUPABASE_URL=https://your-project.supabase.co"
+fi
+
+if grep -q "SUPABASE_PUBLISHABLE_KEY=" local.properties; then
+    echo "✅ SUPABASE_PUBLISHABLE_KEY found in local.properties"
+    supabase_key=$(grep "SUPABASE_PUBLISHABLE_KEY=" local.properties | cut -d'=' -f2)
+    if [[ $supabase_key == *"your_supabase_publishable_key"* ]]; then
+        echo "⚠️  SUPABASE_PUBLISHABLE_KEY is still a placeholder"
+        echo "   Update with actual Supabase Publishable key"
+    else
+        echo "✅ SUPABASE_PUBLISHABLE_KEY appears to be configured"
+    fi
+else
+    echo "❌ SUPABASE_PUBLISHABLE_KEY not found in local.properties"
+    echo "   Add: SUPABASE_PUBLISHABLE_KEY=your_publishable_key_here"
+    
+    # Check for legacy anon key
+    if grep -q "SUPABASE_ANON_KEY=" local.properties; then
+        echo "⚠️  Found legacy SUPABASE_ANON_KEY - please migrate to SUPABASE_PUBLISHABLE_KEY"
+        echo "   The 'anon key' is now legacy. Use 'Publishable key' instead."
+    fi
+fi
+
 echo ""
 echo "🏁 Next Steps"
 echo "============="
-echo "1. Ensure APIs are enabled in Google Cloud Console:"
-echo "   - Maps SDK for Android"
-echo "   - Places API"
-echo ""
-echo "2. Configure API key restrictions:"
+echo "1. Google Maps Setup:"
+echo "   - Ensure APIs are enabled in Google Cloud Console"
 echo "   - Package name: xyz.moroku0519.shoppinghelper.debug"
 echo "   - SHA-1 fingerprint: (see above)"
 echo ""
-echo "3. If still having issues, check:"
-echo "   - Google Cloud Console → APIs & Services → Quotas"
-echo "   - Google Cloud Console → APIs & Services → Credentials"
+echo "2. Supabase Setup (Phase 2):"
+echo "   - Create project at https://supabase.com/"
+echo "   - Run database schema from docs/supabase_schema.sql"
+echo "   - Update local.properties with actual URL and Publishable key"
+echo "   - Note: Use 'Publishable key' not legacy 'anon key'"
+echo "   - Test connection using in-app Supabase test screen"
 echo ""
-echo "4. Test in app and check logcat for detailed error messages:"
-echo "   adb logcat | grep -i 'maps\\|google\\|auth'"
+echo "3. Documentation:"
+echo "   - See docs/SUPABASE_SETUP_GUIDE.md for detailed setup"
+echo "   - Check README.md for troubleshooting guides"
+echo ""
+echo "4. Debug commands:"
+echo "   adb logcat | grep -i 'maps\\|supabase\\|auth'"

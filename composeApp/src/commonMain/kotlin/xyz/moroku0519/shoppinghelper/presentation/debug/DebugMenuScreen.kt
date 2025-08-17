@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 fun DebugMenuScreen(
     onBackClick: () -> Unit,
     onNavigateToSupabaseTest: () -> Unit,
+    onNavigateToRepositoryTest: () -> Unit = {}, // Repository テスト用
     onNavigateToDatabaseTest: () -> Unit = {} // 将来の拡張用
 ) {
     Scaffold(
@@ -82,6 +83,7 @@ fun DebugMenuScreen(
                     onClick = {
                         when (item.id) {
                             "supabase_test" -> onNavigateToSupabaseTest()
+                            "repository_test" -> onNavigateToRepositoryTest()
                             "database_test" -> onNavigateToDatabaseTest()
                             // 将来の機能拡張用
                         }
@@ -162,6 +164,12 @@ private val debugMenuItems = listOf(
         title = "Supabase接続テスト",
         description = "クラウドデータベースの接続と認証をテスト",
         icon = Icons.Default.Settings
+    ),
+    DebugMenuItemData(
+        id = "repository_test",
+        title = "SupabaseRepository CRUD テスト",
+        description = "データベースCRUD操作とRLS権限をテスト",
+        icon = Icons.Default.Build
     ),
     DebugMenuItemData(
         id = "database_test",

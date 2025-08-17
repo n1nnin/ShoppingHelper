@@ -139,7 +139,7 @@ fun SupabaseTestScreen(
 }
 
 @Composable
-fun TestResultCard(result: TestResult) {
+internal fun TestResultCard(result: TestResult) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(

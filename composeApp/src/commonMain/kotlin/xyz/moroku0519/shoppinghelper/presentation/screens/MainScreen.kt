@@ -23,6 +23,7 @@ import xyz.moroku0519.shoppinghelper.presentation.model.toUiModel
 import xyz.moroku0519.shoppinghelper.presentation.viewmodel.ShoppingListViewModel
 import xyz.moroku0519.shoppinghelper.presentation.debug.SupabaseTestScreen
 import xyz.moroku0519.shoppinghelper.presentation.debug.DebugMenuScreen
+import xyz.moroku0519.shoppinghelper.presentation.debug.SupabaseRepositoryTestScreen
 import xyz.moroku0519.shoppinghelper.BuildConfig
 
 sealed class BottomNavScreen(
@@ -140,12 +141,23 @@ fun MainScreen() {
                         },
                         onNavigateToSupabaseTest = {
                             navController.navigate("supabase_test")
+                        },
+                        onNavigateToRepositoryTest = {
+                            navController.navigate("repository_test")
                         }
                     )
                 }
                 
                 composable("supabase_test") {
                     SupabaseTestScreen(
+                        onBackClick = {
+                            navController.popBackStack()
+                        }
+                    )
+                }
+                
+                composable("repository_test") {
+                    SupabaseRepositoryTestScreen(
                         onBackClick = {
                             navController.popBackStack()
                         }

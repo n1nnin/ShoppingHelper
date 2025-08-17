@@ -237,20 +237,26 @@ erDiagram
    cd ShoppingHelper
    ```
 
-2. **Configure Google Maps API**
+2. **Configure API Keys**
    ```bash
-   # Copy the sample file and add your API key
+   # Copy the sample file and add your API keys
    cp local.properties.sample local.properties
    
-   # Edit local.properties and replace with your actual API key
+   # Edit local.properties and replace with your actual keys
    MAPS_API_KEY=your_google_maps_api_key_here
+   SUPABASE_URL=https://your-project.supabase.co
+   SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key_here
    ```
    
-   **Get your API key:**
+   **Google Maps API:**
    - Visit [Google Cloud Console](https://console.cloud.google.com/)
    - Create a project and enable "Maps SDK for Android" and "Places API"
-   - Generate an API key and add it to `local.properties`
-   - **Configure API key restrictions (important for security and functionality)**
+   - Generate an API key and configure restrictions
+   
+   **Supabase (Phase 2):**
+   - Visit [Supabase](https://supabase.com/) and create a project
+   - Get URL and **Publishable key** from Project Settings → API (not legacy anon key)
+   - See `docs/SUPABASE_SETUP_GUIDE.md` for detailed setup
 
 3. **Build and run**
    ```bash

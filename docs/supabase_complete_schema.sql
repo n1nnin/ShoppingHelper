@@ -1,30 +1,37 @@
 -- ============================================================================
--- Supabase Database Schema for ShoppingHelper
+-- Supabase Complete Database Schema for ShoppingHelper
 -- ============================================================================
--- This file contains the complete PostgreSQL schema for ShoppingHelper
--- Run this in Supabase SQL Editor to set up the database
+-- Version: 2.0
+-- Last Updated: 2024-01-17
 -- 
--- Features:
--- - User profiles linked to Supabase Auth
--- - Shopping lists with sharing capabilities  
--- - Items with priority and categorization
--- - Shops with location data
--- - Item templates for frequent purchases
--- - Row Level Security (RLS) for data isolation
--- - Real-time subscriptions support
+-- This file contains the complete PostgreSQL schema for ShoppingHelper including:
+-- - Initial schema setup
+-- - Migration scripts
+-- - RLS policy fixes
+-- 
+-- Usage:
+-- 1. Run this entire script in Supabase SQL Editor for fresh setup
+-- 2. Or run specific sections for updates
 -- ============================================================================
 
 -- ============================================================================
--- 1. EXTENSIONS
+-- SECTION 1: EXTENSIONS & CLEANUP
 -- ============================================================================
+
 -- Enable required PostgreSQL extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";  -- For UUID generation
-CREATE EXTENSION IF NOT EXISTS "postgis";    -- For location/geography support
+
+-- Clean up old columns if they exist (migration from old schema)
+ALTER TABLE shops DROP COLUMN IF EXISTS location;
 
 -- ============================================================================
--- 2. ENUMS
+-- SECTION 2: ENUMS
 -- ============================================================================
--- Define custom types for consistency
+
+-- Drop existing types if they exist (for clean reinstall)
+DROP TYPE IF EXISTS priority_level CASCADE;
+DROP TYPE IF EXISTS item_category CASCADE;
+DROP TYPE IF EXISTS shop_category CASCADE;
 
 -- Item priority levels
 CREATE TYPE priority_level AS ENUM ('HIGH', 'NORMAL', 'LOW');
@@ -42,11 +49,11 @@ CREATE TYPE shop_category AS ENUM (
 );
 
 -- ============================================================================
--- 3. CORE TABLES
+-- SECTION 3: CORE TABLES
 -- ============================================================================
 
 -- User profiles (extends Supabase auth.users)
-CREATE TABLE profiles (
+CREATE TABLE IF NOT EXISTS profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     email TEXT,
     display_name TEXT,
@@ -56,7 +63,7 @@ CREATE TABLE profiles (
 );
 
 -- Shopping lists
-CREATE TABLE shopping_lists (
+CREATE TABLE IF NOT EXISTS shopping_lists (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL CHECK (char_length(name) > 0),
     owner_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
@@ -66,12 +73,13 @@ CREATE TABLE shopping_lists (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Shops with location support
-CREATE TABLE shops (
+-- Shops with location support (latitude/longitude)
+CREATE TABLE IF NOT EXISTS shops (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL CHECK (char_length(name) > 0),
     address TEXT,
-    location GEOGRAPHY(POINT),  -- PostGIS point for lat/lng
+    latitude DOUBLE PRECISION,  -- 緯度
+    longitude DOUBLE PRECISION, -- 経度
     category shop_category NOT NULL,
     is_favorite BOOLEAN DEFAULT false,
     owner_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
@@ -79,8 +87,13 @@ CREATE TABLE shops (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Ensure latitude/longitude columns exist (migration support)
+ALTER TABLE shops 
+ADD COLUMN IF NOT EXISTS latitude DOUBLE PRECISION,
+ADD COLUMN IF NOT EXISTS longitude DOUBLE PRECISION;
+
 -- Shopping items
-CREATE TABLE shopping_items (
+CREATE TABLE IF NOT EXISTS shopping_items (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     list_id UUID REFERENCES shopping_lists(id) ON DELETE CASCADE NOT NULL,
     name TEXT NOT NULL CHECK (char_length(name) > 0),
@@ -98,7 +111,7 @@ CREATE TABLE shopping_items (
 );
 
 -- Item templates (frequently purchased items)
-CREATE TABLE item_templates (
+CREATE TABLE IF NOT EXISTS item_templates (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL CHECK (char_length(name) > 0),
     quantity INTEGER DEFAULT 1 CHECK (quantity > 0),
@@ -113,7 +126,7 @@ CREATE TABLE item_templates (
 );
 
 -- Shopping list sharing (many-to-many)
-CREATE TABLE list_shares (
+CREATE TABLE IF NOT EXISTS list_shares (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     list_id UUID REFERENCES shopping_lists(id) ON DELETE CASCADE NOT NULL,
     user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
@@ -124,38 +137,38 @@ CREATE TABLE list_shares (
 );
 
 -- ============================================================================
--- 4. INDEXES FOR PERFORMANCE
+-- SECTION 4: INDEXES FOR PERFORMANCE
 -- ============================================================================
 
 -- Shopping lists indexes
-CREATE INDEX idx_shopping_lists_owner_id ON shopping_lists(owner_id);
-CREATE INDEX idx_shopping_lists_active ON shopping_lists(owner_id, is_active);
-CREATE INDEX idx_shopping_lists_updated_at ON shopping_lists(updated_at);
+CREATE INDEX IF NOT EXISTS idx_shopping_lists_owner_id ON shopping_lists(owner_id);
+CREATE INDEX IF NOT EXISTS idx_shopping_lists_active ON shopping_lists(owner_id, is_active);
+CREATE INDEX IF NOT EXISTS idx_shopping_lists_updated_at ON shopping_lists(updated_at);
 
 -- Shopping items indexes
-CREATE INDEX idx_shopping_items_list_id ON shopping_items(list_id);
-CREATE INDEX idx_shopping_items_shop_id ON shopping_items(shop_id);
-CREATE INDEX idx_shopping_items_completed ON shopping_items(list_id, is_completed);
-CREATE INDEX idx_shopping_items_priority ON shopping_items(list_id, priority);
-CREATE INDEX idx_shopping_items_updated_at ON shopping_items(updated_at);
+CREATE INDEX IF NOT EXISTS idx_shopping_items_list_id ON shopping_items(list_id);
+CREATE INDEX IF NOT EXISTS idx_shopping_items_shop_id ON shopping_items(shop_id);
+CREATE INDEX IF NOT EXISTS idx_shopping_items_completed ON shopping_items(list_id, is_completed);
+CREATE INDEX IF NOT EXISTS idx_shopping_items_priority ON shopping_items(list_id, priority);
+CREATE INDEX IF NOT EXISTS idx_shopping_items_updated_at ON shopping_items(updated_at);
 
 -- Shops indexes  
-CREATE INDEX idx_shops_owner_id ON shops(owner_id);
-CREATE INDEX idx_shops_category ON shops(category);
-CREATE INDEX idx_shops_favorite ON shops(owner_id, is_favorite);
-CREATE INDEX idx_shops_location ON shops USING GIST(location);  -- Spatial index
+CREATE INDEX IF NOT EXISTS idx_shops_owner_id ON shops(owner_id);
+CREATE INDEX IF NOT EXISTS idx_shops_category ON shops(category);
+CREATE INDEX IF NOT EXISTS idx_shops_favorite ON shops(owner_id, is_favorite);
+CREATE INDEX IF NOT EXISTS idx_shops_location ON shops(latitude, longitude);
 
 -- Item templates indexes
-CREATE INDEX idx_item_templates_owner_id ON item_templates(owner_id);
-CREATE INDEX idx_item_templates_category ON item_templates(owner_id, category);
-CREATE INDEX idx_item_templates_use_count ON item_templates(owner_id, use_count DESC);
+CREATE INDEX IF NOT EXISTS idx_item_templates_owner_id ON item_templates(owner_id);
+CREATE INDEX IF NOT EXISTS idx_item_templates_category ON item_templates(owner_id, category);
+CREATE INDEX IF NOT EXISTS idx_item_templates_use_count ON item_templates(owner_id, use_count DESC);
 
 -- List shares indexes
-CREATE INDEX idx_list_shares_user_id ON list_shares(user_id);
-CREATE INDEX idx_list_shares_list_id ON list_shares(list_id);
+CREATE INDEX IF NOT EXISTS idx_list_shares_user_id ON list_shares(user_id);
+CREATE INDEX IF NOT EXISTS idx_list_shares_list_id ON list_shares(list_id);
 
 -- ============================================================================
--- 5. ROW LEVEL SECURITY (RLS) POLICIES
+-- SECTION 5: ROW LEVEL SECURITY (RLS) POLICIES
 -- ============================================================================
 
 -- Enable RLS on all tables
@@ -166,7 +179,33 @@ ALTER TABLE shopping_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE item_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE list_shares ENABLE ROW LEVEL SECURITY;
 
--- Profiles policies (users can only see/edit their own profile)
+-- Drop all existing policies (for clean setup)
+DROP POLICY IF EXISTS "Users can view their own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can update their own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can insert their own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can view their own lists" ON shopping_lists;
+DROP POLICY IF EXISTS "Users can create their own lists" ON shopping_lists;
+DROP POLICY IF EXISTS "Users can update their own lists" ON shopping_lists;
+DROP POLICY IF EXISTS "Users can delete their own lists" ON shopping_lists;
+DROP POLICY IF EXISTS "Users can view shops" ON shops;
+DROP POLICY IF EXISTS "Users can create shops" ON shops;
+DROP POLICY IF EXISTS "Users can update their own shops" ON shops;
+DROP POLICY IF EXISTS "Users can delete their own shops" ON shops;
+DROP POLICY IF EXISTS "Users can view items in their lists" ON shopping_items;
+DROP POLICY IF EXISTS "Users can create items in their lists" ON shopping_items;
+DROP POLICY IF EXISTS "Users can update items in their lists" ON shopping_items;
+DROP POLICY IF EXISTS "Users can delete items in their lists" ON shopping_items;
+DROP POLICY IF EXISTS "Users can view their own templates" ON item_templates;
+DROP POLICY IF EXISTS "Users can create their own templates" ON item_templates;
+DROP POLICY IF EXISTS "Users can update their own templates" ON item_templates;
+DROP POLICY IF EXISTS "Users can delete their own templates" ON item_templates;
+DROP POLICY IF EXISTS "Users can view their shares" ON list_shares;
+DROP POLICY IF EXISTS "Users can view shares of their lists" ON list_shares;
+DROP POLICY IF EXISTS "List owners can manage shares" ON list_shares;
+DROP POLICY IF EXISTS "List owners can update shares" ON list_shares;
+DROP POLICY IF EXISTS "List owners can delete shares" ON list_shares;
+
+-- Profiles policies
 CREATE POLICY "Users can view their own profile" ON profiles
     FOR SELECT USING (auth.uid() = id);
 
@@ -176,28 +215,15 @@ CREATE POLICY "Users can update their own profile" ON profiles
 CREATE POLICY "Users can insert their own profile" ON profiles
     FOR INSERT WITH CHECK (auth.uid() = id);
 
--- Shopping lists policies
+-- Shopping lists policies (simplified to avoid recursion)
 CREATE POLICY "Users can view their own lists" ON shopping_lists
-    FOR SELECT USING (
-        auth.uid() = owner_id 
-        OR id IN (
-            SELECT list_id FROM list_shares 
-            WHERE user_id = auth.uid()
-        )
-    );
+    FOR SELECT USING (auth.uid() = owner_id);
 
 CREATE POLICY "Users can create their own lists" ON shopping_lists
     FOR INSERT WITH CHECK (auth.uid() = owner_id);
 
 CREATE POLICY "Users can update their own lists" ON shopping_lists
-    FOR UPDATE USING (
-        auth.uid() = owner_id 
-        OR id IN (
-            SELECT list_id FROM list_shares 
-            WHERE user_id = auth.uid() 
-            AND permission_level IN ('write', 'admin')
-        )
-    );
+    FOR UPDATE USING (auth.uid() = owner_id);
 
 CREATE POLICY "Users can delete their own lists" ON shopping_lists
     FOR DELETE USING (auth.uid() = owner_id);
@@ -218,55 +244,36 @@ CREATE POLICY "Users can update their own shops" ON shops
 CREATE POLICY "Users can delete their own shops" ON shops
     FOR DELETE USING (auth.uid() = owner_id);
 
--- Shopping items policies
-CREATE POLICY "Users can view items in accessible lists" ON shopping_items
+-- Shopping items policies (simplified to avoid recursion)
+CREATE POLICY "Users can view items in their lists" ON shopping_items
     FOR SELECT USING (
         list_id IN (
             SELECT id FROM shopping_lists 
             WHERE owner_id = auth.uid()
-            OR id IN (
-                SELECT list_id FROM list_shares 
-                WHERE user_id = auth.uid()
-            )
         )
     );
 
-CREATE POLICY "Users can create items in accessible lists" ON shopping_items
+CREATE POLICY "Users can create items in their lists" ON shopping_items
     FOR INSERT WITH CHECK (
         list_id IN (
             SELECT id FROM shopping_lists 
             WHERE owner_id = auth.uid()
-            OR id IN (
-                SELECT list_id FROM list_shares 
-                WHERE user_id = auth.uid() 
-                AND permission_level IN ('write', 'admin')
-            )
         )
     );
 
-CREATE POLICY "Users can update items in accessible lists" ON shopping_items
+CREATE POLICY "Users can update items in their lists" ON shopping_items
     FOR UPDATE USING (
         list_id IN (
             SELECT id FROM shopping_lists 
             WHERE owner_id = auth.uid()
-            OR id IN (
-                SELECT list_id FROM list_shares 
-                WHERE user_id = auth.uid() 
-                AND permission_level IN ('write', 'admin')
-            )
         )
     );
 
-CREATE POLICY "Users can delete items in accessible lists" ON shopping_items
+CREATE POLICY "Users can delete items in their lists" ON shopping_items
     FOR DELETE USING (
         list_id IN (
             SELECT id FROM shopping_lists 
             WHERE owner_id = auth.uid()
-            OR id IN (
-                SELECT list_id FROM list_shares 
-                WHERE user_id = auth.uid() 
-                AND permission_level IN ('write', 'admin')
-            )
         )
     );
 
@@ -283,18 +290,36 @@ CREATE POLICY "Users can update their own templates" ON item_templates
 CREATE POLICY "Users can delete their own templates" ON item_templates
     FOR DELETE USING (auth.uid() = owner_id);
 
--- List shares policies
-CREATE POLICY "Users can view shares for their lists" ON list_shares
+-- List shares policies (simplified to avoid recursion)
+CREATE POLICY "Users can view their shares" ON list_shares
+    FOR SELECT USING (user_id = auth.uid());
+
+CREATE POLICY "Users can view shares of their lists" ON list_shares
     FOR SELECT USING (
-        user_id = auth.uid()  -- Shares with me
-        OR list_id IN (
+        list_id IN (
             SELECT id FROM shopping_lists 
-            WHERE owner_id = auth.uid()  -- Shares from my lists
+            WHERE owner_id = auth.uid()
         )
     );
 
 CREATE POLICY "List owners can manage shares" ON list_shares
-    FOR ALL USING (
+    FOR INSERT WITH CHECK (
+        list_id IN (
+            SELECT id FROM shopping_lists 
+            WHERE owner_id = auth.uid()
+        )
+    );
+
+CREATE POLICY "List owners can update shares" ON list_shares
+    FOR UPDATE USING (
+        list_id IN (
+            SELECT id FROM shopping_lists 
+            WHERE owner_id = auth.uid()
+        )
+    );
+
+CREATE POLICY "List owners can delete shares" ON list_shares
+    FOR DELETE USING (
         list_id IN (
             SELECT id FROM shopping_lists 
             WHERE owner_id = auth.uid()
@@ -302,7 +327,7 @@ CREATE POLICY "List owners can manage shares" ON list_shares
     );
 
 -- ============================================================================
--- 6. TRIGGERS FOR AUTOMATIC TIMESTAMPS
+-- SECTION 6: TRIGGERS FOR AUTOMATIC TIMESTAMPS
 -- ============================================================================
 
 -- Function to update updated_at timestamp
@@ -315,24 +340,28 @@ END;
 $$ language 'plpgsql';
 
 -- Apply triggers to relevant tables
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON profiles;
 CREATE TRIGGER update_profiles_updated_at 
     BEFORE UPDATE ON profiles 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_shopping_lists_updated_at ON shopping_lists;
 CREATE TRIGGER update_shopping_lists_updated_at 
     BEFORE UPDATE ON shopping_lists 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_shops_updated_at ON shops;
 CREATE TRIGGER update_shops_updated_at 
     BEFORE UPDATE ON shops 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_shopping_items_updated_at ON shopping_items;
 CREATE TRIGGER update_shopping_items_updated_at 
     BEFORE UPDATE ON shopping_items 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ============================================================================
--- 7. HELPER FUNCTIONS
+-- SECTION 7: HELPER FUNCTIONS
 -- ============================================================================
 
 -- Function to create user profile on signup
@@ -344,12 +373,14 @@ BEGIN
         NEW.id,
         NEW.email,
         COALESCE(NEW.raw_user_meta_data->>'display_name', split_part(NEW.email, '@', 1))
-    );
+    )
+    ON CONFLICT (id) DO NOTHING;
     RETURN NEW;
 END;
 $$ language 'plpgsql' SECURITY DEFINER;
 
 -- Trigger to automatically create profile on user signup
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
     FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
@@ -368,8 +399,8 @@ BEGIN
     SELECT 
         s.id as shop_id,
         s.name as shop_name,
-        ST_Y(s.location::geometry) as latitude,
-        ST_X(s.location::geometry) as longitude,
+        s.latitude,
+        s.longitude,
         COUNT(si.id) as pending_items_count
     FROM shops s
     INNER JOIN shopping_items si ON s.id = si.shop_id
@@ -377,31 +408,79 @@ BEGIN
     WHERE sl.owner_id = user_uuid
         AND si.is_completed = false
         AND sl.is_active = true
-        AND s.location IS NOT NULL
-    GROUP BY s.id, s.name, s.location
+        AND s.latitude IS NOT NULL
+        AND s.longitude IS NOT NULL
+    GROUP BY s.id, s.name, s.latitude, s.longitude
     HAVING COUNT(si.id) > 0;
 END;
 $$ language 'plpgsql' SECURITY DEFINER;
 
 -- ============================================================================
--- 8. SAMPLE DATA (OPTIONAL - FOR DEVELOPMENT)
+-- SECTION 8: VERIFICATION QUERIES
+-- ============================================================================
+
+-- Verify table structure
+SELECT 
+    table_name,
+    column_name,
+    data_type,
+    is_nullable
+FROM 
+    information_schema.columns
+WHERE 
+    table_schema = 'public'
+    AND table_name IN ('profiles', 'shopping_lists', 'shops', 'shopping_items', 'item_templates', 'list_shares')
+ORDER BY 
+    table_name, ordinal_position;
+
+-- Verify RLS policies
+SELECT 
+    schemaname,
+    tablename,
+    policyname,
+    permissive,
+    roles,
+    cmd,
+    qual
+FROM 
+    pg_policies 
+WHERE 
+    tablename IN ('profiles', 'shopping_lists', 'shops', 'shopping_items', 'item_templates', 'list_shares')
+ORDER BY 
+    tablename, policyname;
+
+-- Verify indexes
+SELECT 
+    tablename,
+    indexname,
+    indexdef
+FROM 
+    pg_indexes 
+WHERE 
+    schemaname = 'public'
+    AND tablename IN ('profiles', 'shopping_lists', 'shops', 'shopping_items', 'item_templates', 'list_shares')
+ORDER BY 
+    tablename, indexname;
+
+-- ============================================================================
+-- SECTION 9: SAMPLE DATA (OPTIONAL - FOR DEVELOPMENT)
 -- ============================================================================
 
 -- Uncomment to insert sample data for development
 /*
--- Sample shop categories
-INSERT INTO shops (id, name, address, location, category, owner_id) VALUES
-(uuid_generate_v4(), 'Sample Supermarket', '123 Main St', ST_SetSRID(ST_MakePoint(139.6917, 35.6895), 4326), 'SUPERMARKET', null),
-(uuid_generate_v4(), 'Corner Pharmacy', '456 Oak Ave', ST_SetSRID(ST_MakePoint(139.7000, 35.7000), 4326), 'PHARMACY', null),
-(uuid_generate_v4(), 'Electronics Store', '789 Tech Blvd', ST_SetSRID(ST_MakePoint(139.7100, 35.7100), 4326), 'ELECTRONICS', null);
+-- Sample shop categories (public shops without owner)
+INSERT INTO shops (name, address, latitude, longitude, category, owner_id) VALUES
+('Sample Supermarket', '123 Main St', 35.6895, 139.6917, 'SUPERMARKET', null),
+('Corner Pharmacy', '456 Oak Ave', 35.7000, 139.7000, 'PHARMACY', null),
+('Electronics Store', '789 Tech Blvd', 35.7100, 139.7100, 'ELECTRONICS', null)
+ON CONFLICT DO NOTHING;
 */
 
 -- ============================================================================
--- SCHEMA SETUP COMPLETE
+-- COMPLETE - Your ShoppingHelper database is ready!
 -- ============================================================================
--- After running this script:
--- 1. Verify all tables are created
--- 2. Test RLS policies with different users
--- 3. Set up real-time subscriptions in your app
--- 4. Configure your Supabase API keys in local.properties
+-- Next steps:
+-- 1. Configure your Supabase API keys in the app
+-- 2. Test the connection using the debug menu
+-- 3. Start using the app!
 -- ============================================================================

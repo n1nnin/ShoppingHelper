@@ -14,6 +14,7 @@ sdk.dir=/path/to/your/android/sdk
 # Enable Maps SDK for Android and Places API
 MAPS_API_KEY=your_google_maps_api_key_here
 
-# Future API keys (for upcoming features)
-# SUPABASE_URL=your_supabase_project_url
-# SUPABASE_ANON_KEY=your_supabase_anon_key
+# Supabase Configuration (Phase 2: Cloud Integration)
+# Get these from: https://supabase.com/dashboard/project/your-project/settings/api
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key_here

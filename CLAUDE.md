@@ -184,3 +184,13 @@ notificationManager.showTestNotification()
 
 **Testing:**
 Use `GeofenceDemo.kt` components to test geofence functionality in development. Default geofence radius is 100 meters with 24-hour expiration.
+
+### Supabase Database Schema
+The complete database schema is available in `docs/supabase_complete_schema.sql`. This includes:
+- Initial table setup with all required columns
+- Migration scripts for schema updates
+- RLS policies (Row Level Security) for data isolation
+- Helper functions for geofencing and user profile management
+- Verification queries for testing setup
+
+To set up the database, run the entire file in Supabase SQL Editor.
