@@ -127,3 +127,6 @@ konan/
 
 # Project specific
 spec.md
+
+# Debug scripts (keep in repo for team use)
+# debug_api_setup.sh is intentionally committed for troubleshooting

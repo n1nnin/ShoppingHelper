@@ -250,6 +250,7 @@ erDiagram
    - Visit [Google Cloud Console](https://console.cloud.google.com/)
    - Create a project and enable "Maps SDK for Android" and "Places API"
    - Generate an API key and add it to `local.properties`
+   - **Configure API key restrictions (important for security and functionality)**
 
 3. **Build and run**
    ```bash
@@ -385,6 +386,54 @@ geofenceManager.setupGeofencesForShops(testShops)
 val notificationManager = ShoppingNotificationManager(context)
 notificationManager.showTestNotification()
 ```
+
+## 🔧 Troubleshooting
+
+### Google Maps Authorization Error
+
+If you see "Authorization failure" when using maps, follow these steps:
+
+#### 1. Check API Enablement
+Ensure these APIs are enabled in [Google Cloud Console](https://console.cloud.google.com/):
+- **Maps SDK for Android**
+- **Places API** (for future features)
+
+#### 2. Configure API Key Restrictions
+1. Go to **APIs & Services → Credentials** in Google Cloud Console
+2. Click on your API key
+3. Under **Application restrictions**, select **Android apps**
+4. Add your app details:
+   - **Package name**: `xyz.moroku0519.shoppinghelper.debug` (for debug builds)
+   - **SHA-1 certificate fingerprint**: Get with this command:
+   
+   ```bash
+   # Get debug SHA-1 fingerprint
+   keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+   ```
+   
+   Look for the SHA1 line, e.g.: `F4:DD:B6:7B:B0:E8:1B:0A:DD:9B:8A:68:05:E5:F9:5B:2F:A0:24:88`
+
+#### 3. API Restrictions
+Under **API restrictions**, select **Restrict key** and choose:
+- Maps SDK for Android
+- Places API
+
+#### 4. Verify Setup
+```bash
+# Use the built-in diagnostics script
+./debug_api_setup.sh
+
+# Or manually check:
+./gradlew clean
+./gradlew :composeApp:assembleDebug
+cat composeApp/build/intermediates/merged_manifests/debug/processDebugManifest/AndroidManifest.xml | grep -A 2 "API_KEY"
+```
+
+#### 5. Common Issues
+- **Wrong package name**: Ensure you use `xyz.moroku0519.shoppinghelper.debug` for debug builds
+- **Missing SHA-1**: The debug keystore SHA-1 must be registered
+- **API not enabled**: Both Maps SDK for Android and Places API must be enabled
+- **Quota exceeded**: Check API usage limits in Google Cloud Console
 
 ## 🔒 Security
 
