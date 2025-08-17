@@ -8,6 +8,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,6 +28,7 @@ import xyz.moroku0519.shoppinghelper.presentation.model.ShopUi
 import xyz.moroku0519.shoppinghelper.presentation.model.toUiModel
 import xyz.moroku0519.shoppinghelper.presentation.viewmodel.ShoppingListViewModel
 import xyz.moroku0519.shoppinghelper.util.currentTimeMillis
+import xyz.moroku0519.shoppinghelper.BuildConfig
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,7 +38,8 @@ fun ShopsScreen(
     onShopsUpdated: (List<ShopUi>) -> Unit = {},
     onBackClick: () -> Unit,
     onNavigateToMap: () -> Unit = {},
-    onShopClick: (String) -> Unit = {}
+    onShopClick: (String) -> Unit = {},
+    onNavigateToSupabaseTest: (() -> Unit)? = null
 ) {
     val viewModel: ShoppingListViewModel = koinInject()
     
@@ -76,6 +79,16 @@ fun ShopsScreen(
                             contentDescription = "地図表示"
                         )
                     }
+                    
+                    // デバッグビルドのみSupabaseテストボタンを表示
+                    if (BuildConfig.DEBUG && onNavigateToSupabaseTest != null) {
+                        IconButton(onClick = onNavigateToSupabaseTest) {
+                            Icon(
+                                Icons.Default.Settings,
+                                contentDescription = "Supabaseテスト"
+                            )
+                        }
+                    }
                 }
             )
         },
@@ -90,6 +103,48 @@ fun ShopsScreen(
         }
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
+            // テスト用：常にSupabaseテストボタンを表示（一時的）
+            println("🧪 DEBUG CHECK: BuildConfig.DEBUG=${BuildConfig.DEBUG}, onNavigateToSupabaseTest=${onNavigateToSupabaseTest != null}")
+            // 一時的にtrueに固定してテスト
+            if (true) {
+                println("🧪 DEBUG: Showing Supabase test button - BuildConfig.DEBUG=${BuildConfig.DEBUG}, onNavigateToSupabaseTest=${onNavigateToSupabaseTest != null}")
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = "🧪 Supabase接続テスト",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                text = "デバッグ機能：データベース接続と認証をテスト",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                        }
+                        TextButton(onClick = {
+                            onNavigateToSupabaseTest?.invoke() ?: run {
+                                println("🧪 DEBUG: onNavigateToSupabaseTest is null!")
+                            }
+                        }) {
+                            Text("テスト実行")
+                        }
+                    }
+                }
+            }
+            
             if (shops.isEmpty()) {
                 // 空状態
                 EmptyShopsState()

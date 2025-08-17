@@ -20,6 +20,8 @@ import androidx.navigation.NavType
 import org.koin.compose.koinInject
 import xyz.moroku0519.shoppinghelper.presentation.model.toUiModel
 import xyz.moroku0519.shoppinghelper.presentation.viewmodel.ShoppingListViewModel
+import xyz.moroku0519.shoppinghelper.presentation.debug.SupabaseTestScreen
+import xyz.moroku0519.shoppinghelper.BuildConfig
 
 sealed class BottomNavScreen(
     val route: String,
@@ -135,6 +137,10 @@ fun ShopsNavigation() {
                 onNavigateToMap = { /* ボトムナビで遷移 */ },
                 onShopClick = { shopId ->
                     navController.navigate("shop_items/$shopId")
+                },
+                onNavigateToSupabaseTest = {
+                    println("🧪 DEBUG MAIN: Navigating to Supabase test from MainScreen")
+                    navController.navigate("supabase_test")
                 }
             )
         }
@@ -160,6 +166,17 @@ fun ShopsNavigation() {
                     navController.popBackStack()
                 }
             )
+        }
+        
+        // Supabaseテスト画面（デバッグビルドのみ）
+        if (BuildConfig.DEBUG) {
+            composable("supabase_test") {
+                SupabaseTestScreen(
+                    onBackClick = {
+                        navController.popBackStack()
+                    }
+                )
+            }
         }
     }
 }

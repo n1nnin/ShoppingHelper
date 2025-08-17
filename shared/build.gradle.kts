@@ -45,13 +45,22 @@ kotlin {
             
             // Kotlinx Serialization
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
+            
+            // Supabase client
+            implementation(libs.supabase.postgrest.kt)
+            implementation(libs.supabase.gotrue.kt)
+            implementation(libs.supabase.realtime.kt)
+            implementation(libs.ktor.client.core)
         }
         androidMain.dependencies {
             implementation(libs.sqldelight.driver.android)
             implementation(libs.koin.android)
+            implementation(libs.ktor.client.cio)
         }
         iosMain.dependencies {
             implementation(libs.sqldelight.driver.native)
+            implementation("io.ktor:ktor-client-darwin:2.3.12")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

@@ -85,11 +85,27 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-        // Load MAPS_API_KEY from local.properties, fallback to gradle.properties, then default
+        // Load API keys from local.properties, fallback to gradle.properties, then default
         val mapsApiKey = localProperties.getProperty("MAPS_API_KEY") 
             ?: project.findProperty("MAPS_API_KEY") as String? 
             ?: "YOUR_API_KEY_HERE"
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+        
+        // Supabase configuration for Phase 2
+        val supabaseUrl = localProperties.getProperty("SUPABASE_URL")
+            ?: project.findProperty("SUPABASE_URL") as String?
+            ?: "https://your-project.supabase.co"
+        buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrl\"")
+        
+        val supabasePublishableKey = localProperties.getProperty("SUPABASE_PUBLISHABLE_KEY")
+            ?: localProperties.getProperty("SUPABASE_ANON_KEY")  // Fallback for migration
+            ?: project.findProperty("SUPABASE_PUBLISHABLE_KEY") as String?
+            ?: project.findProperty("SUPABASE_ANON_KEY") as String?  // Legacy fallback
+            ?: "your-supabase-publishable-key-here"
+        buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", "\"$supabasePublishableKey\"")
+        
+        // Legacy support (deprecated)
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"$supabasePublishableKey\"")
     }
 
     packaging {
