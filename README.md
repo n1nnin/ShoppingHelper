@@ -239,9 +239,17 @@ erDiagram
 
 2. **Configure Google Maps API**
    ```bash
-   # Add to gradle.properties
+   # Copy the sample file and add your API key
+   cp local.properties.sample local.properties
+   
+   # Edit local.properties and replace with your actual API key
    MAPS_API_KEY=your_google_maps_api_key_here
    ```
+   
+   **Get your API key:**
+   - Visit [Google Cloud Console](https://console.cloud.google.com/)
+   - Create a project and enable "Maps SDK for Android" and "Places API"
+   - Generate an API key and add it to `local.properties`
 
 3. **Build and run**
    ```bash
@@ -378,15 +386,38 @@ val notificationManager = ShoppingNotificationManager(context)
 notificationManager.showTestNotification()
 ```
 
+## 🔒 Security
+
+### API Key Management
+
+- **API keys are stored in `local.properties`** (git-ignored)
+- **Never commit API keys** to version control
+- **Use `local.properties.sample`** as a template for setup
+- **API keys are loaded at build time** from local.properties → gradle.properties → default
+
+### Setup for New Developers
+
+```bash
+# 1. Copy the sample configuration
+cp local.properties.sample local.properties
+
+# 2. Edit local.properties with your actual API keys
+# MAPS_API_KEY=your_actual_api_key_here
+
+# 3. Verify the setup works
+./gradlew :composeApp:assembleDebug
+```
+
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Follow the existing code style and architecture patterns
 4. Add tests for new functionality
-5. Commit your changes (`git commit -m 'Add amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
+5. **Never commit sensitive data** (API keys, credentials)
+6. Commit your changes (`git commit -m 'Add amazing feature'`)
+7. Push to the branch (`git push origin feature/amazing-feature`)
+8. Open a Pull Request
 
 ## 📄 License
 

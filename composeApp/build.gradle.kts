@@ -1,9 +1,19 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.kotlin.compose)
     // alias(libs.plugins.sqldelight) // temporary removal
+}
+
+// Load local.properties
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
 }
 
 kotlin {
@@ -75,7 +85,11 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-        manifestPlaceholders["MAPS_API_KEY"] = project.findProperty("MAPS_API_KEY") ?: "YOUR_API_KEY_HERE"
+        // Load MAPS_API_KEY from local.properties, fallback to gradle.properties, then default
+        val mapsApiKey = localProperties.getProperty("MAPS_API_KEY") 
+            ?: project.findProperty("MAPS_API_KEY") as String? 
+            ?: "YOUR_API_KEY_HERE"
+        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
     }
 
     packaging {
