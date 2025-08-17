@@ -32,13 +32,15 @@ import xyz.moroku0519.shoppinghelper.presentation.model.getDisplayName
 fun AddItemDialog(
     isVisible: Boolean,
     currentShopId: String? = null,
+    availableShops: List<ShopUi> = emptyList(),
     onDismiss: () -> Unit,
-    onConfirm: (name: String, priority: Priority, category: ItemCategory) -> Unit
+    onConfirm: (name: String, shopId: String?, priority: Priority, category: ItemCategory) -> Unit
 ) {
     if (isVisible) {
         var itemName by remember { mutableStateOf("") }
         var selectedPriority by remember { mutableStateOf(Priority.NORMAL) }
         var selectedCategory by remember { mutableStateOf(ItemCategory.OTHER) }
+        var selectedShopId by remember { mutableStateOf(currentShopId) }
         var showError by remember { mutableStateOf(false) }
 
         // ダイアログが開くたびに状態をリセット
@@ -47,6 +49,7 @@ fun AddItemDialog(
                 itemName = ""
                 selectedPriority = Priority.NORMAL
                 selectedCategory = ItemCategory.OTHER
+                selectedShopId = currentShopId
                 showError = false
             }
         }
@@ -77,6 +80,7 @@ fun AddItemDialog(
                                         if (itemName.isNotBlank()) {
                                             onConfirm(
                                                 itemName.trim(),
+                                                selectedShopId,
                                                 selectedPriority,
                                                 selectedCategory
                                             )
@@ -116,6 +120,15 @@ fun AddItemDialog(
                                 { Text("商品名は必須です", color = MaterialTheme.colorScheme.error) }
                             } else null
                         )
+
+                        // お店選択（リスト管理から来た場合のみ表示）
+                        if (currentShopId == null && availableShops.isNotEmpty()) {
+                            ShopSelector(
+                                selectedShopId = selectedShopId,
+                                availableShops = availableShops,
+                                onShopSelected = { selectedShopId = it }
+                            )
+                        }
 
                         // カテゴリ選択
                         CategorySelector(
@@ -193,9 +206,94 @@ private fun AddItemDialogPreview() {
             AddItemDialog(
                 isVisible = true,
                 currentShopId = "shop1",
+                availableShops = emptyList(),
                 onDismiss = {},
-                onConfirm = { _, _, _ -> }
+                onConfirm = { _, _, _, _ -> }
             )
+        }
+    }
+}
+
+@Composable
+private fun ShopSelector(
+    selectedShopId: String?,
+    availableShops: List<ShopUi>,
+    onShopSelected: (String?) -> Unit
+) {
+    Column {
+        Text(
+            text = "お店",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // "お店を選択しない"オプション
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .selectable(
+                    selected = (selectedShopId == null),
+                    onClick = { onShopSelected(null) }
+                )
+                .padding(vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            RadioButton(
+                selected = (selectedShopId == null),
+                onClick = { onShopSelected(null) }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "お店を指定しない",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        // 利用可能なお店のリスト
+        availableShops.forEach { shop ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .selectable(
+                        selected = (selectedShopId == shop.id),
+                        onClick = { onShopSelected(shop.id) }
+                    )
+                    .padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RadioButton(
+                    selected = (selectedShopId == shop.id),
+                    onClick = { onShopSelected(shop.id) }
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // お店のカテゴリカラーインジケーター
+                Box(
+                    modifier = Modifier
+                        .size(12.dp)
+                        .background(
+                            color = shop.category.color,
+                            shape = CircleShape
+                        )
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = shop.name,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    if (shop.address.isNotEmpty()) {
+                        Text(
+                            text = shop.address,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
         }
     }
 }

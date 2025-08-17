@@ -52,7 +52,7 @@ fun ShoppingItemCard(
                     modifier = Modifier
                         .size(4.dp, 18.dp)
                         .background(
-                            color = item.categoryColor,
+                            color = item.category.color,
                             shape = RoundedCornerShape(2.dp)
                         )
                 )
@@ -61,7 +61,7 @@ fun ShoppingItemCard(
                     modifier = Modifier
                         .size(4.dp, 18.dp)
                         .background(
-                            color = item.priorityColor,
+                            color = item.priority.color,
                             shape = RoundedCornerShape(2.dp)
                         )
                 )
@@ -106,7 +106,7 @@ fun ShoppingItemCard(
                 Text(
                     text = "優先度: ${item.priority.getDisplayName()}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = item.priorityColor
+                    color = item.priority.color
                 )
             }
 

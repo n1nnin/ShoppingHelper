@@ -19,10 +19,7 @@ data class ShoppingItemUi(
     val shopId: String?,
     val priority: Priority,
     val category: ItemCategory = ItemCategory.OTHER
-) {
-    val priorityColor: Color = priority.color
-    val categoryColor: Color = category.color
-}
+)
 
 @Composable
 fun Priority.getDisplayName(): String {

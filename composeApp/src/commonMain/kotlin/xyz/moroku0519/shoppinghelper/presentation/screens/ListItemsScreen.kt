@@ -151,11 +151,12 @@ fun ListItemsScreen(
         AddItemDialog(
             isVisible = showAddDialog,
             currentShopId = null, // リスト視点では店舗指定なし
+            availableShops = shops, // お店選択可能
             onDismiss = { showAddDialog = false },
-            onConfirm = { name, priority, category ->
+            onConfirm = { name, shopId, priority, category ->
                 viewModel.addItem(
                     name = name,
-                    shopId = null, // 後からお店を割り当て可能
+                    shopId = shopId,
                     priority = priority,
                     category = category
                 )
@@ -166,13 +167,14 @@ fun ListItemsScreen(
         // アイテム編集ダイアログ
         EditItemDialog(
             item = itemToEdit,
+            availableShops = shops, // お店選択可能
             onDismiss = { itemToEdit = null },
-            onConfirm = { name, priority ->
+            onConfirm = { name, shopId, priority ->
                 itemToEdit?.let { item ->
                     viewModel.updateItem(
                         itemId = item.id,
                         name = name,
-                        shopId = item.shopId,
+                        shopId = shopId,
                         priority = priority,
                         category = item.category
                     )

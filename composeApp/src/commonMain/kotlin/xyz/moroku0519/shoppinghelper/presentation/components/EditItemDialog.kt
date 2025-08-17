@@ -19,12 +19,14 @@ import xyz.moroku0519.shoppinghelper.presentation.model.getDisplayName
 @Composable
 fun EditItemDialog(
     item: ShoppingItemUi?,
+    availableShops: List<ShopUi> = emptyList(),
     onDismiss: () -> Unit,
-    onConfirm: (name: String, priority: Priority) -> Unit
+    onConfirm: (name: String, shopId: String?, priority: Priority) -> Unit
 ) {
     if (item != null) {
         var itemName by remember(item) { mutableStateOf(item.name) }
         var selectedPriority by remember(item) { mutableStateOf(item.priority) }
+        var selectedShopId by remember(item) { mutableStateOf(item.shopId) }
         var showError by remember { mutableStateOf(false) }
 
         AlertDialog(
@@ -57,8 +59,14 @@ fun EditItemDialog(
                         } else null
                     )
 
-                    // 所属するお店（変更不可）
-                    if (item.shopName != null) {
+                    // お店選択（リスト管理から来た場合は変更可能）
+                    if (availableShops.isNotEmpty()) {
+                        ShopSelector(
+                            selectedShopId = selectedShopId,
+                            availableShops = availableShops,
+                            onShopSelected = { selectedShopId = it }
+                        )
+                    } else if (item.shopName != null) {
                         CurrentShopInfo(shopName = item.shopName)
                     }
 
@@ -75,6 +83,7 @@ fun EditItemDialog(
                         if (itemName.isNotBlank()) {
                             onConfirm(
                                 itemName.trim(),
+                                selectedShopId,
                                 selectedPriority
                             )
                             onDismiss()
@@ -92,6 +101,90 @@ fun EditItemDialog(
                 }
             }
         )
+    }
+}
+
+@Composable
+private fun ShopSelector(
+    selectedShopId: String?,
+    availableShops: List<ShopUi>,
+    onShopSelected: (String?) -> Unit
+) {
+    Column {
+        Text(
+            text = "お店",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // "お店を選択しない"オプション
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .selectable(
+                    selected = (selectedShopId == null),
+                    onClick = { onShopSelected(null) }
+                )
+                .padding(vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            RadioButton(
+                selected = (selectedShopId == null),
+                onClick = { onShopSelected(null) }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "お店を指定しない",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        // 利用可能なお店のリスト
+        availableShops.forEach { shop ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .selectable(
+                        selected = (selectedShopId == shop.id),
+                        onClick = { onShopSelected(shop.id) }
+                    )
+                    .padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RadioButton(
+                    selected = (selectedShopId == shop.id),
+                    onClick = { onShopSelected(shop.id) }
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // お店のカテゴリカラーインジケーター
+                Box(
+                    modifier = Modifier
+                        .size(12.dp)
+                        .background(
+                            color = shop.category.color,
+                            shape = CircleShape
+                        )
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = shop.name,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    if (shop.address.isNotEmpty()) {
+                        Text(
+                            text = shop.address,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -207,7 +300,7 @@ private fun EditItemDialogPreview() {
                     priority = Priority.NORMAL
                 ),
                 onDismiss = {},
-                onConfirm = { _, _ -> }
+                onConfirm = { _, _, _ -> }
             )
         }
     }

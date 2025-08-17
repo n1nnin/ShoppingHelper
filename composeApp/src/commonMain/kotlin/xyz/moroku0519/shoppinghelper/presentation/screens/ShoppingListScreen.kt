@@ -134,8 +134,9 @@ fun ShoppingListScreen(
             AddItemDialog(
                 isVisible = showAddDialog,
                 currentShopId = shopId,
+                availableShops = emptyList(), // お店固定なので選択不可
                 onDismiss = { showAddDialog = false },
-                onConfirm = { name, priority, category ->
+                onConfirm = { name, _, priority, category ->
                     viewModel.addItem(
                         name = name,
                         shopId = shopId, // 現在のお店のIDを使用
@@ -150,8 +151,9 @@ fun ShoppingListScreen(
             // アイテム編集ダイアログ
             EditItemDialog(
                 item = itemToEdit,
+                availableShops = emptyList(), // お店固定なので選択不可
                 onDismiss = { itemToEdit = null },
-                onConfirm = { name, priority ->
+                onConfirm = { name, _, priority ->
                     itemToEdit?.let { item ->
                         viewModel.updateItem(
                             itemId = item.id,
