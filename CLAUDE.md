@@ -9,8 +9,10 @@ ShoppingHelper is a **Kotlin Multiplatform (KMP)** shopping list application wit
 **Key Technologies:**
 - Kotlin Multiplatform (v2.1.0)
 - Jetpack Compose with Material 3
+- SQLDelight (local database)
 - Google Maps & Location Services
 - Navigation Compose
+- Koin (dependency injection)
 
 ## Common Commands
 
@@ -55,6 +57,23 @@ ShoppingHelper is a **Kotlin Multiplatform (KMP)** shopping list application wit
 ./gradlew connectedAndroidTest
 ```
 
+### Database & SQLDelight
+```bash
+# Generate SQLDelight interfaces
+./gradlew generateSqlDelightInterface
+
+# Verify database migrations
+./gradlew verifyCommonMainShoppingDatabaseMigration
+
+# Build debug APK with Database Inspector support
+./gradlew :composeApp:assembleDebug
+
+# Run the app and use Android Studio's Database Inspector to:
+# - View database schema and data
+# - Run live queries on shopping.db
+# - Monitor real-time data changes
+```
+
 ### iOS Framework
 ```bash
 # Build iOS framework
@@ -78,20 +97,31 @@ ShoppingHelper is a **Kotlin Multiplatform (KMP)** shopping list application wit
 
 ### Key Components
 
-**Navigation Structure:** Three main screens connected via Navigation Compose
-- `ShoppingListScreen` (start destination)
-- `ShopsScreen` 
-- `MapScreen`
+**Navigation Structure:** Bottom navigation with three main screens
+- `ShoppingListScreen` (shopping lists management)
+- `ListItemsScreen` (items for selected list)
+- `ShopsScreen` (shops and map view)
+- `MapScreen` (Google Maps integration)
 
 **Domain Models:**
+- `ShoppingList`: Multiple shopping lists with active state management
+- `ShoppingItem`: Items with priority, category, and shop association
 - `Shop`: Store information with location and category
-- `ShoppingItem`: Items with priority and shop association
+- `ItemTemplate`: Frequently used items for quick addition
 - `Geofence`: Location-based notifications (100m radius default)
-- `ShoppingNotification`: Notification data structure
+
+**Data Layer Architecture:**
+- **Repository Pattern**: `ShoppingRepository` interface with `SqlDelightShoppingRepository` implementation
+- **Local Database**: SQLDelight with `shopping.db` containing 4 tables (shopping_list, shopping_item, shop, item_template)
+- **Data Migration**: `DataMigrationHelper` for automatic migration from SharedPreferences to SQLDelight
+- **Reactive Data**: Kotlin Flow for real-time UI updates with automatic SQL-to-Flow conversion
+- **Type Safety**: Custom ColumnAdapters for enum types (Priority, ItemCategory, ShopCategory)
+- **Dependency Injection**: Koin modules for database, repository, and platform-specific drivers
 
 **UI Architecture:**
 - Clean separation with UI models (`ShopUi`, `ShoppingItemUi`) extending domain models
-- Reusable components: `AddItemDialog`, `AddShopDialog`, `ShopCart`, `ShoppingItemCart`
+- Reusable components: `AddItemDialog`, `EditItemDialog`, `AddShopDialog`, `ShoppingItemCart`
+- Enhanced dialogs with shop selection for flexible item management
 - Platform-specific: `AndroidMapView` for Google Maps integration
 
 ### Configuration
@@ -103,9 +133,15 @@ ShoppingHelper is a **Kotlin Multiplatform (KMP)** shopping list application wit
 ## Development Notes
 
 ### Dependencies
-- SQLDelight is configured but not yet implemented
-- Koin is included but not actively used in current codebase
-- Google Play Services required for Maps and Location features
+- **SQLDelight**: Fully implemented for local database operations with automatic migration
+  - Android: `android-driver` with SQLite
+  - iOS: `native-driver` with platform SQLite
+  - Schema: 4 tables with foreign key constraints and optimized indexes
+- **Koin**: Actively used for dependency injection across Android/iOS platforms
+  - Database drivers, repository, and enum adapters configuration
+- **Google Play Services**: Required for Maps and Location features
+- **Kotlin Serialization**: For JSON serialization and data migration
+- **Navigation Compose**: For screen navigation and bottom tab management
 
 ### Platform-Specific Features
 - **Android**: Full Google Maps integration, geofencing, background location, push notifications
