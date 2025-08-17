@@ -1,0 +1,42 @@
+-- Shopping Lists Table
+CREATE TABLE shopping_list (
+    id TEXT PRIMARY KEY NOT NULL,
+    name TEXT NOT NULL,
+    is_active INTEGER NOT NULL DEFAULT 1,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+);
+
+-- Queries
+getAllLists:
+SELECT * FROM shopping_list
+ORDER BY created_at DESC;
+
+getActiveList:
+SELECT * FROM shopping_list
+WHERE is_active = 1
+LIMIT 1;
+
+getListById:
+SELECT * FROM shopping_list
+WHERE id = ?;
+
+insertList:
+INSERT INTO shopping_list (id, name, is_active, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?);
+
+updateList:
+UPDATE shopping_list
+SET name = ?, is_active = ?, updated_at = ?
+WHERE id = ?;
+
+deleteList:
+DELETE FROM shopping_list
+WHERE id = ?;
+
+setActiveList:
+UPDATE shopping_list
+SET is_active = CASE
+    WHEN id = ? THEN 1
+    ELSE 0
+END;

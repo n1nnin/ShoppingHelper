@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.kotlin.compose)
     kotlin("plugin.serialization") version "2.1.0"
+    alias(libs.plugins.sqldelight)
 }
 
 kotlin {
@@ -36,8 +37,8 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             
-            // SQLDelight - moved to composeApp
-            // implementation(libs.sqldelight.coroutines)
+            // SQLDelight
+            implementation(libs.sqldelight.coroutines)
             
             // Koin for DI
             implementation(libs.koin.core)
@@ -46,11 +47,11 @@ kotlin {
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
         }
         androidMain.dependencies {
-            // implementation(libs.sqldelight.driver.android) // moved to composeApp
+            implementation(libs.sqldelight.driver.android)
             implementation(libs.koin.android)
         }
         iosMain.dependencies {
-            // implementation(libs.sqldelight.driver.sqlite) // moved to composeApp
+            implementation(libs.sqldelight.driver.native)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -70,10 +71,11 @@ android {
     }
 }
 
-// sqldelight {
-//     databases {
-//         create("ShoppingDatabase") {
-//             packageName.set("xyz.moroku0519.shoppinghelper.database")
-//         }
-//     }
-// }
+sqldelight {
+    databases {
+        create("ShoppingDatabase") {
+            packageName.set("xyz.moroku0519.shoppinghelper.database")
+            srcDirs.setFrom("src/commonMain/sqldelight")
+        }
+    }
+}

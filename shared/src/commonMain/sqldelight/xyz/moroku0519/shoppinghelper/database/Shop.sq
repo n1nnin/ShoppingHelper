@@ -1,0 +1,67 @@
+import xyz.moroku0519.shoppinghelper.model.ShopCategory;
+
+-- Shops Table
+CREATE TABLE shop (
+    id TEXT PRIMARY KEY NOT NULL,
+    name TEXT NOT NULL,
+    address TEXT,
+    latitude REAL,
+    longitude REAL,
+    category TEXT AS ShopCategory NOT NULL,
+    is_favorite INTEGER NOT NULL DEFAULT 0,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+);
+
+-- Create index for better query performance
+CREATE INDEX IF NOT EXISTS idx_shop_favorite ON shop(is_favorite);
+CREATE INDEX IF NOT EXISTS idx_shop_category ON shop(category);
+
+-- Queries
+getAllShops:
+SELECT * FROM shop
+ORDER BY name ASC;
+
+getFavoriteShops:
+SELECT * FROM shop
+WHERE is_favorite = 1
+ORDER BY name ASC;
+
+getShopById:
+SELECT * FROM shop
+WHERE id = ?;
+
+getShopsByCategory:
+SELECT * FROM shop
+WHERE category = ?
+ORDER BY name ASC;
+
+insertShop:
+INSERT INTO shop (
+    id, name, address, latitude, longitude,
+    category, is_favorite, created_at, updated_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+updateShop:
+UPDATE shop
+SET name = ?, address = ?, latitude = ?, longitude = ?,
+    category = ?, is_favorite = ?, updated_at = ?
+WHERE id = ?;
+
+toggleFavorite:
+UPDATE shop
+SET is_favorite = 1 - is_favorite, updated_at = ?
+WHERE id = ?;
+
+deleteShop:
+DELETE FROM shop
+WHERE id = ?;
+
+countItemsForShop:
+SELECT COUNT(*) FROM shopping_item
+WHERE shop_id = ?;
+
+getShopsWithPendingItems:
+SELECT DISTINCT s.* FROM shop s
+INNER JOIN shopping_item i ON s.id = i.shop_id
+WHERE i.is_completed = 0;

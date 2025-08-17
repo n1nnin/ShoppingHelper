@@ -1,0 +1,86 @@
+import xyz.moroku0519.shoppinghelper.model.Priority;
+import xyz.moroku0519.shoppinghelper.model.ItemCategory;
+
+-- Shopping Items Table
+CREATE TABLE shopping_item (
+    id TEXT PRIMARY KEY NOT NULL,
+    list_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    quantity INTEGER NOT NULL DEFAULT 1,
+    unit TEXT,
+    price REAL,
+    priority TEXT AS Priority NOT NULL,
+    category TEXT AS ItemCategory NOT NULL,
+    shop_id TEXT,
+    is_completed INTEGER NOT NULL DEFAULT 0,
+    notes TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    completed_at INTEGER,
+    FOREIGN KEY (list_id) REFERENCES shopping_list(id) ON DELETE CASCADE,
+    FOREIGN KEY (shop_id) REFERENCES shop(id) ON DELETE SET NULL
+);
+
+-- Create index for better query performance
+CREATE INDEX IF NOT EXISTS idx_shopping_item_list_id ON shopping_item(list_id);
+CREATE INDEX IF NOT EXISTS idx_shopping_item_shop_id ON shopping_item(shop_id);
+CREATE INDEX IF NOT EXISTS idx_shopping_item_completed ON shopping_item(is_completed);
+
+-- Queries
+getItemsByListId:
+SELECT * FROM shopping_item
+WHERE list_id = ?
+ORDER BY is_completed ASC, priority DESC, created_at ASC;
+
+getIncompleteItemsByShop:
+SELECT * FROM shopping_item
+WHERE shop_id = ? AND is_completed = 0
+ORDER BY priority DESC, created_at ASC;
+
+getAllIncompleteItems:
+SELECT * FROM shopping_item
+WHERE is_completed = 0
+ORDER BY priority DESC, created_at ASC;
+
+getItemById:
+SELECT * FROM shopping_item
+WHERE id = ?;
+
+insertItem:
+INSERT INTO shopping_item (
+    id, list_id, name, quantity, unit, price, 
+    priority, category, shop_id, is_completed, notes,
+    created_at, updated_at, completed_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+updateItem:
+UPDATE shopping_item
+SET name = ?, quantity = ?, unit = ?, price = ?,
+    priority = ?, category = ?, shop_id = ?, is_completed = ?,
+    notes = ?, updated_at = ?, completed_at = ?
+WHERE id = ?;
+
+updateItemCompleted:
+UPDATE shopping_item
+SET is_completed = ?, completed_at = ?, updated_at = ?
+WHERE id = ?;
+
+deleteItem:
+DELETE FROM shopping_item
+WHERE id = ?;
+
+deleteCompletedItems:
+DELETE FROM shopping_item
+WHERE list_id = ? AND is_completed = 1;
+
+deleteItemsByListId:
+DELETE FROM shopping_item
+WHERE list_id = ?;
+
+countItemsByListId:
+SELECT COUNT(*) FROM shopping_item
+WHERE list_id = ?;
+
+countCompletedItemsByListId:
+SELECT COUNT(*) FROM shopping_item
+WHERE list_id = ? AND is_completed = 1;

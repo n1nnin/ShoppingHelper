@@ -1,0 +1,67 @@
+import xyz.moroku0519.shoppinghelper.model.ItemCategory;
+
+-- Item Templates Table
+CREATE TABLE item_template (
+    id TEXT PRIMARY KEY NOT NULL,
+    name TEXT NOT NULL,
+    quantity INTEGER NOT NULL DEFAULT 1,
+    unit TEXT,
+    category TEXT AS ItemCategory NOT NULL,
+    shop_id TEXT,
+    notes TEXT,
+    use_count INTEGER NOT NULL DEFAULT 0,
+    last_used_at INTEGER,
+    created_at INTEGER NOT NULL,
+    FOREIGN KEY (shop_id) REFERENCES shop(id) ON DELETE SET NULL
+);
+
+-- Create index for better query performance
+CREATE INDEX IF NOT EXISTS idx_item_template_category ON item_template(category);
+CREATE INDEX IF NOT EXISTS idx_item_template_use_count ON item_template(use_count);
+
+-- Queries
+getAllTemplates:
+SELECT * FROM item_template
+ORDER BY use_count DESC, name ASC;
+
+getTemplatesByCategory:
+SELECT * FROM item_template
+WHERE category = ?
+ORDER BY use_count DESC, name ASC;
+
+getTemplateById:
+SELECT * FROM item_template
+WHERE id = ?;
+
+searchTemplates:
+SELECT * FROM item_template
+WHERE name LIKE '%' || ? || '%'
+ORDER BY use_count DESC, name ASC
+LIMIT 10;
+
+insertTemplate:
+INSERT INTO item_template (
+    id, name, quantity, unit, category,
+    shop_id, notes, use_count, last_used_at, created_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+updateTemplate:
+UPDATE item_template
+SET name = ?, quantity = ?, unit = ?, category = ?,
+    shop_id = ?, notes = ?
+WHERE id = ?;
+
+incrementUseCount:
+UPDATE item_template
+SET use_count = use_count + 1, last_used_at = ?
+WHERE id = ?;
+
+deleteTemplate:
+DELETE FROM item_template
+WHERE id = ?;
+
+getPopularTemplates:
+SELECT * FROM item_template
+WHERE use_count > 0
+ORDER BY use_count DESC
+LIMIT ?;

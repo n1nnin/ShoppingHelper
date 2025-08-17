@@ -85,9 +85,19 @@ android {
     }
 
     buildTypes {
+        getByName("debug") {
+            isDebuggable = true
+            applicationIdSuffix = ".debug"
+            buildConfigField("boolean", "DEBUG", "true")
+        }
         getByName("release") {
             isMinifyEnabled = false
+            buildConfigField("boolean", "DEBUG", "false")
         }
+    }
+    
+    buildFeatures {
+        buildConfig = true
     }
 
     compileOptions {
@@ -99,11 +109,3 @@ android {
         kotlinCompilerExtensionVersion = "1.5.4"
     }
 }
-
-// sqldelight {
-//     databases {
-//         create("ShoppingDatabase") {
-//             packageName.set("xyz.moroku0519.shoppinghelper.database")
-//         }
-//     }
-// }
