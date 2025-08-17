@@ -16,6 +16,8 @@ import xyz.moroku0519.shoppinghelper.presentation.model.toUiModel
 import xyz.moroku0519.shoppinghelper.presentation.screens.MapScreen
 import xyz.moroku0519.shoppinghelper.presentation.screens.ShoppingListScreen
 import xyz.moroku0519.shoppinghelper.presentation.screens.ShopsScreen
+import xyz.moroku0519.shoppinghelper.presentation.debug.SupabaseTestScreen
+import xyz.moroku0519.shoppinghelper.BuildConfig
 
 // 画面定義
 sealed class Screen(val route: String) {
@@ -30,6 +32,7 @@ sealed class Screen(val route: String) {
     }
     data object Shops : Screen("shops")
     data object Map : Screen("map")
+    data object SupabaseTest : Screen("supabase_test")
 }
 
 @Composable
@@ -94,6 +97,12 @@ fun ShoppingMemoNavigation(
 
         // お店一覧画面（メイン画面）
         composable(Screen.Shops.route) {
+            val supabaseTestCallback = { 
+                println("🧪 DEBUG NAV: Navigating to Supabase test")
+                navController.navigate(Screen.SupabaseTest.route) 
+            }
+            println("🧪 DEBUG NAV: Creating ShopsScreen with supabaseTestCallback = $supabaseTestCallback")
+            
             ShopsScreen(
                 initialShops = shops.value,
                 onShopsUpdated = { updatedShops ->
@@ -107,7 +116,7 @@ fun ShoppingMemoNavigation(
                 },
                 onShopClick = { shopId ->
                     navController.navigate(Screen.ShoppingList.createRoute(shopId))
-                }
+                },
             )
         }
 
@@ -117,6 +126,17 @@ fun ShoppingMemoNavigation(
                     navController.popBackStack()
                 }
             )
+        }
+
+        // Supabaseテスト画面（デバッグビルドのみ）
+        if (BuildConfig.DEBUG) {
+            composable(Screen.SupabaseTest.route) {
+                SupabaseTestScreen(
+                    onBackClick = {
+                        navController.popBackStack()
+                    }
+                )
+            }
         }
     }
 }

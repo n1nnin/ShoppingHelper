@@ -3,6 +3,7 @@ package xyz.moroku0519.shoppinghelper.presentation.screens
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
@@ -21,6 +22,7 @@ import org.koin.compose.koinInject
 import xyz.moroku0519.shoppinghelper.presentation.model.toUiModel
 import xyz.moroku0519.shoppinghelper.presentation.viewmodel.ShoppingListViewModel
 import xyz.moroku0519.shoppinghelper.presentation.debug.SupabaseTestScreen
+import xyz.moroku0519.shoppinghelper.presentation.debug.DebugMenuScreen
 import xyz.moroku0519.shoppinghelper.BuildConfig
 
 sealed class BottomNavScreen(
@@ -91,6 +93,20 @@ fun MainScreen() {
                     }
                 }
             }
+        },
+        floatingActionButton = {
+            // デバッグビルドでのみFloatingActionButtonを表示
+            if (BuildConfig.DEBUG && shouldShowBottomBar) {
+                FloatingActionButton(
+                    onClick = {
+                        navController.navigate("debug_menu")
+                    },
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                ) {
+                    Icon(Icons.Default.Build, contentDescription = "デバッグメニュー")
+                }
+            }
         }
     ) { paddingValues ->
         NavHost(
@@ -113,6 +129,28 @@ fun MainScreen() {
                 MapScreen(
                     onBackClick = {} // ボトムナビゲーションなので戻るボタンは不要
                 )
+            }
+            
+            // デバッグメニュー（デバッグビルドのみ）
+            if (BuildConfig.DEBUG) {
+                composable("debug_menu") {
+                    DebugMenuScreen(
+                        onBackClick = {
+                            navController.popBackStack()
+                        },
+                        onNavigateToSupabaseTest = {
+                            navController.navigate("supabase_test")
+                        }
+                    )
+                }
+                
+                composable("supabase_test") {
+                    SupabaseTestScreen(
+                        onBackClick = {
+                            navController.popBackStack()
+                        }
+                    )
+                }
             }
         }
     }
@@ -137,10 +175,6 @@ fun ShopsNavigation() {
                 onNavigateToMap = { /* ボトムナビで遷移 */ },
                 onShopClick = { shopId ->
                     navController.navigate("shop_items/$shopId")
-                },
-                onNavigateToSupabaseTest = {
-                    println("🧪 DEBUG MAIN: Navigating to Supabase test from MainScreen")
-                    navController.navigate("supabase_test")
                 }
             )
         }
@@ -166,17 +200,6 @@ fun ShopsNavigation() {
                     navController.popBackStack()
                 }
             )
-        }
-        
-        // Supabaseテスト画面（デバッグビルドのみ）
-        if (BuildConfig.DEBUG) {
-            composable("supabase_test") {
-                SupabaseTestScreen(
-                    onBackClick = {
-                        navController.popBackStack()
-                    }
-                )
-            }
         }
     }
 }
